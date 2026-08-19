@@ -22,7 +22,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/test-init/{transaction_id}": {
+        "/api/test-init/{transaction_id}": {
             "get": {
                 "description": "Call Test Init after construct code for swagger init",
                 "consumes": [
@@ -48,7 +48,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CalTestInitResponse"
+                            "$ref": "#/definitions/api.CalTestInitResponse"
                         }
                     },
                     "400": {
@@ -65,10 +65,55 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/warehouse/:location_code": {
+            "get": {
+                "description": "Search location by location code, customer, technician, warehouse",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "location warehouse customer technician"
+                ],
+                "summary": "Search location by location code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "email",
+                        "description": "name search by q",
+                        "name": "q",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Location code",
+                        "name": "location_code",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "handlers.CalTestInitResponse": {
+        "api.CalTestInitResponse": {
             "type": "object",
             "properties": {
                 "data": {

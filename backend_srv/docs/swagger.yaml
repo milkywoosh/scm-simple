@@ -1,6 +1,6 @@
 basePath: /api/v1
 definitions:
-  handlers.CalTestInitResponse:
+  api.CalTestInitResponse:
     properties:
       data:
         properties:
@@ -26,7 +26,7 @@ info:
   title: scm-simple API
   version: "1.0"
 paths:
-  /test-init/{transaction_id}:
+  /api/test-init/{transaction_id}:
     get:
       consumes:
       - application/json
@@ -43,7 +43,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/handlers.CalTestInitResponse'
+            $ref: '#/definitions/api.CalTestInitResponse'
         "400":
           description: Bad Request
           schema:
@@ -55,6 +55,36 @@ paths:
       summary: Test init for swagger docs
       tags:
       - callany
+  /api/warehouse/:location_code:
+    get:
+      consumes:
+      - application/json
+      description: Search location by location code, customer, technician, warehouse
+      parameters:
+      - description: name search by q
+        format: email
+        in: query
+        name: q
+        type: string
+      - description: Location code
+        in: path
+        name: location_code
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Search location by location code
+      tags:
+      - location warehouse customer technician
 securityDefinitions:
   BasicAuth:
     type: basic
