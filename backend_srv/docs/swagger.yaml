@@ -1,0 +1,61 @@
+basePath: /api/v1
+definitions:
+  handlers.CalTestInitResponse:
+    properties:
+      data:
+        properties:
+          status_approval:
+            type: string
+          transaction_id:
+            type: string
+          warehouse_code:
+            type: string
+        type: object
+      message:
+        type: string
+    type: object
+host: 103.235.75.94:8000
+info:
+  contact:
+    email: archer.lukman@gmail.com
+    name: API Support
+  description: This is my service API documentation for scm-simple.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: scm-simple API
+  version: "1.0"
+paths:
+  /test-init/{transaction_id}:
+    get:
+      consumes:
+      - application/json
+      description: Call Test Init after construct code for swagger init
+      parameters:
+      - description: Transaction Id
+        in: path
+        name: transaction_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CalTestInitResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      summary: Test init for swagger docs
+      tags:
+      - callany
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
