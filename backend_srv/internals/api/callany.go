@@ -27,7 +27,7 @@ type CalTestInitResponse struct {
 // @Success      200  {object}  CalTestInitResponse
 // @Failure      400  {string}  ErrorResponse
 // @Failure      404  {string}  ErrorResponse
-// @Router       /test-init/{transaction_id} [get]
+// @Router       /api/test-init/{transaction_id} [get]
 func CallTestInit(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
 
 	log.Printf("cek CallTestInit 11")
