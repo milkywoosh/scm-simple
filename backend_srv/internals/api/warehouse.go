@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -42,4 +43,49 @@ func (s *Server) GetLocationByLocationCode(w http.ResponseWriter, req *http.Requ
 	resp["Data"] = whInfo
 
 	internals.WriteResponse(w, http.StatusAccepted, resp)
+}
+
+type CreateDraftWarehouseTransferParams struct {
+	LocationOrigin      string `json:"location_origin"`
+	LocationDestination string `json:"location_destination"`
+}
+
+
+
+// CreateDraftWarehouseTransfer godoc
+// @Summary      Create New Draft Transaction
+// @Description  Create New Draft Transaction Warehouse to Warehouse
+// @Tags         warehouse_service item_transfer
+// @Accept       json
+// @Produce      json
+// @Param		 request        body      CreateDraftWarehouseTransferParams  true  "draft transaction transfer payload"
+// @Success      200  {object}  map[string]any
+// @Failure      400  {string}  ErrorResponse
+// @Router       /api/v1/warehouse/create-draft-transfer [post]
+func (s *Server) CreateDraftWarehouseTransfer(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
+
+	ctx := req.Context()
+
+	var ReqBody CreateDraftWarehouseTransferParams
+	DataResp := make(map[string]any)
+
+	// read input from Body
+	errDecode := json.NewDecoder(req.Body).Decode(&ReqBody)
+	if errDecode != nil {
+		DataResp["message"] = "error parsing request body"
+		internals.WriteResponse(w, http.StatusBadRequest, DataResp)
+		return
+	}
+
+	NewDraft, err := s.service.WarehouseService.CreateDraftTx(ctx, ReqBody.LocationOrigin, ReqBody.LocationDestination)
+	if err != nil {
+		DataResp["message"] = err.Error()
+		internals.WriteResponse(w, http.StatusConflict, DataResp)
+		return
+	}
+	DataResp["message"] = "create draft berhasil"
+	DataResp["data"] = NewDraft
+	internals.WriteResponse(w, http.StatusAccepted, DataResp)
+	return
+
 }

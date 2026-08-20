@@ -22,6 +22,47 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/warehouse/create-draft-transfer": {
+            "post": {
+                "description": "Create New Draft Transaction Warehouse to Warehouse",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "warehouse_service item_transfer"
+                ],
+                "summary": "Create New Draft Transaction",
+                "parameters": [
+                    {
+                        "description": "draft transaction transfer payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateDraftWarehouseTransferParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/warehouse/:location_code": {
             "get": {
                 "description": "Search location by location code, customer, technician, warehouse",
@@ -131,6 +172,17 @@ const docTemplate = `{
                     }
                 },
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.CreateDraftWarehouseTransferParams": {
+            "type": "object",
+            "properties": {
+                "location_destination": {
+                    "type": "string"
+                },
+                "location_origin": {
                     "type": "string"
                 }
             }

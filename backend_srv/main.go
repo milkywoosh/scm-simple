@@ -19,6 +19,8 @@ import (
 	"scm-simple-luke.com/dir/internals/services"
 )
 
+/* swag init --parseDependency --parseDependencyLevel 1 */
+
 // @title           scm-simple API
 // @version         1.0
 // @description     This is my service API documentation for scm-simple.
@@ -120,5 +122,4 @@ func main() {
 		log.Fatalf("last tail err info: %v", err)
 	}
 
-	
 }

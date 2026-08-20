@@ -59,4 +59,49 @@ func (d *DBLocationRepository) GetLocation(ctx context.Context, locationCode str
 
 	msg := fmt.Sprintf("tipe lokasi %s belum dapat diakses", locationType)
 	return nil, errors.New(msg)
+
+}
+
+func (d *DBLocationRepository) NewDraftTransaction(ctx context.Context, transaction_number, transaction_type, origin, destination string) (domain.TransactionInfo, error) {
+
+	query :=
+		`INSERT INTO transaction_item_transfers (
+			transaction_number, 
+			transaction_type,
+			origin, 
+			destination
+		) VALUES (
+		 	$1, $2, $3, $4
+		)`
+
+	_, err := d.Conn.Exec(
+		ctx,
+		query,
+		transaction_number,
+		transaction_type,
+		origin,
+		destination,
+	)
+	if err != nil {
+		return domain.TransactionInfo{}, err
+	}
+
+	n := domain.TransactionInfo{}
+	n.Transaction_number = transaction_number
+	n.Transaction_type = transaction_type
+
+	return n, nil
+
+}
+
+func (d *DBLocationRepository) SendItem(ctx context.Context, transaction_number, from string, to string, item string) error {
+	return nil
+}
+
+func (d *DBLocationRepository) ReceiveItem(ctx context.Context, transaction_number, from string, to string, item string) error {
+	return nil
+}
+
+func (d *DBLocationRepository) CheckTransaction(transaction_number string) error {
+	return nil
 }

@@ -1,13 +1,16 @@
 
+CREATE TYPE type_of_trans AS ENUM ('warehouse_to_warehouse', 'warehouse_to_technician', 'technician_to_warehouse');
+
 CREATE TABLE transaction_item_transfers (
-    id number  primary key serial,
+    id serial primary key ,
     transaction_number VARCHAR(60) NOT NULL UNIQUE,
+    transaction_type type_of_trans,
     origin VARCHAR(60),
     destination VARCHAR(60),
     created_at DATE NOT NULL DEFAULT CURRENT_DATE,
     submitted_at DATE,
     approved_at DATE,
-    canceled_at DATE,
+    canceled_at DATE
 );
 
 CREATE INDEX trans_number_idx ON transaction_item_transfers (transaction_number);

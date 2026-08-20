@@ -14,6 +14,13 @@ definitions:
       message:
         type: string
     type: object
+  api.CreateDraftWarehouseTransferParams:
+    properties:
+      location_destination:
+        type: string
+      location_origin:
+        type: string
+    type: object
 host: 103.235.75.94:8000
 info:
   contact:
@@ -26,6 +33,33 @@ info:
   title: scm-simple API
   version: "1.0"
 paths:
+  /api/v1/warehouse/create-draft-transfer:
+    post:
+      consumes:
+      - application/json
+      description: Create New Draft Transaction Warehouse to Warehouse
+      parameters:
+      - description: draft transaction transfer payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateDraftWarehouseTransferParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Create New Draft Transaction
+      tags:
+      - warehouse_service item_transfer
   /api/warehouse/:location_code:
     get:
       consumes:
