@@ -1,5 +1,5 @@
 
-CREATE TYPE type_of_trans AS ENUM ('warehouse_to_warehouse', 'warehouse_to_technician', 'technician_to_warehouse');
+CREATE TYPE type_of_trans AS ENUM ('warehouse_to_warehouse', 'warehouse_to_technician', 'technician_to_warehouse', 'procurement', 'installation', 'deployment');
 
 CREATE TABLE transaction_item_transfers (
     id serial primary key ,
@@ -27,3 +27,118 @@ ALTER TABLE transaction_item_transfer_details
         FOREIGN KEY (id_trans_item_transfer)
         REFERENCES transaction_item_transfers(id)
         ON DELETE CASCADE;
+
+
+
+-- seed data
+
+-- =========================================================
+-- TRANSACTION ITEM TRANSFERS
+-- =========================================================
+
+INSERT INTO transaction_item_transfers (
+    transaction_number,
+    status,
+    transaction_type,
+    origin,
+    destination,
+    created_at,
+    submitted_at,
+    approved_at
+) VALUES
+(
+    'TRX-2026-000001',
+    'APPROVED',
+    'procurement',
+    'FACTORY',
+    'WH-JKT-01',
+    '2026-01-10',
+    '2026-01-10',
+    '2026-01-10'
+),
+(
+    'TRX-2026-000002',
+    'APPROVED',
+    'warehouse_to_warehouse',
+    'WH-JKT-01',
+    'TECH-JKT-01',
+    '2026-01-12',
+    '2026-01-12',
+    '2026-01-12'
+),
+(
+    'TRX-2026-000003',
+    'APPROVED',
+    'warehouse_to_warehouse',
+    'WH-JKT-01',
+    'WH-BDG-01',
+    '2026-01-15',
+    '2026-01-15',
+    '2026-01-15'
+),
+(
+    'TRX-2026-000004',
+    'APPROVED',
+    'installation',
+    'WH-BDG-01',
+    'SITE-BDG-001',
+    '2026-01-20',
+    '2026-01-20',
+    '2026-01-20'
+),
+(
+    'TRX-2026-000005',
+    'APPROVED',
+    'deployment',
+    'SITE-BDG-001',
+    'SITE-JKT-001',
+    '2026-01-25',
+    '2026-01-25',
+    '2026-01-25'
+);
+
+
+-- =========================================================
+-- TRANSACTION ITEM TRANSFER DETAILS
+-- =========================================================
+
+INSERT INTO transaction_item_transfer_details (
+    id_trans_item_transfer,
+    identifier_item,
+    added_at
+) VALUES
+(
+    (SELECT id
+     FROM transaction_item_transfers
+     WHERE transaction_number = 'TRX-2026-000001'),
+    'ITM000000000001',
+    '2026-01-10'
+),
+(
+    (SELECT id
+     FROM transaction_item_transfers
+     WHERE transaction_number = 'TRX-2026-000002'),
+    'ITM000000000002',
+    '2026-01-12'
+),
+(
+    (SELECT id
+     FROM transaction_item_transfers
+     WHERE transaction_number = 'TRX-2026-000003'),
+    'ITM000000000003',
+    '2026-01-15'
+),
+(
+    (SELECT id
+     FROM transaction_item_transfers
+     WHERE transaction_number = 'TRX-2026-000004'),
+    'ITM000000000004',
+    '2026-01-20'
+),
+(
+    (SELECT id
+     FROM transaction_item_transfers
+     WHERE transaction_number = 'TRX-2026-000005'),
+    'ITM000000000005',
+    '2026-01-25'
+);
