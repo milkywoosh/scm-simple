@@ -2,6 +2,7 @@ package internals
 
 import (
 	"bytes"
+	"crypto/rand"
 	"database/sql"
 	"encoding/json"
 	"net/http"
@@ -132,4 +133,14 @@ func (v *NullInt64) UnmarshalJSON(data []byte) error {
 	}
 	v.Int64, v.Valid = *n, true
 	return nil
+}
+
+func RandomStringSuffix(n int) string {
+	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, n)
+	rand.Read(b)
+	for i := range b {
+		b[i] = chars[int(b[i])%len(chars)]
+	}
+	return string(b)
 }
