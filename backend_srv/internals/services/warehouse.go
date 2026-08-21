@@ -2,10 +2,12 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
+	"scm-simple-luke.com/dir/internals"
 	"scm-simple-luke.com/dir/internals/domain"
 )
 
@@ -18,23 +20,27 @@ func (a *WarehouseService) WarehouseInfo(ctx context.Context, location_code stri
 	return locationRepo.GetLocation(ctx, location_code, domain.WarehouseType)
 }
 
-type WarehouseTransferDraft struct {
+type WarehouseTransferHeader struct {
 	TransactionNumber string
+	Status            string
 }
 
 type WarehouseReceiveDraft struct {
 }
 
-func (a *WarehouseService) CreateDraftTx(ctx context.Context, location_origin, location_destination string) (WarehouseTransferDraft, error) {
+func (a *WarehouseService) CreateDraftTx(ctx context.Context, location_origin, location_destination string) (WarehouseTransferHeader, error) {
 	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
 	log.Printf("errr CreateDraftTx %v", err)
-	n := WarehouseTransferDraft{}
+	n := WarehouseTransferHeader{}
 	if err != nil {
 		return n, err
 	}
 
-	currdate := time.DateTime
-	transaction_number := fmt.Sprintf("wh_to_wh_%v", currdate)
+	defer tx.Rollback(ctx)
+
+	currdate := time.Now().Format("20060102150405")
+	randString := internals.RandomStringSuffix(5)
+	transaction_number := fmt.Sprintf("WH_TO_WH_%s_%s", currdate, randString)
 
 	new_transaction, err := tx.NewDraftTransaction(ctx, transaction_number, "warehouse_to_warehouse", location_origin, location_destination)
 	log.Printf("errr CreateDraftTx 1 %v", err)
@@ -52,12 +58,45 @@ func (a *WarehouseService) CreateDraftTx(ctx context.Context, location_origin, l
 		return n, err
 	}
 
-	n.TransactionNumber = new_transaction.Transaction_number
+	n.TransactionNumber = new_transaction.TransactionNumber
+	n.Status = new_transaction.Status
 	return n, nil
 }
 
-func (a *WarehouseService) SendItem(ctx context.Context, transaction_number, item string) error {
-	_, err := a.uow.BeginWarehouseToWarehouse(ctx)
-	return err
+func (a *WarehouseService) AllocateItem(ctx context.Context, transaction_number, identifier string) error {
+	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
 
+	if err != nil {
+		log.Printf("*WarehouseService AllocateItem 1: %v", err)
+		return err
+	}
+
+	defer tx.Rollback(ctx)
+
+	TransInfo, err := tx.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		log.Printf("*WarehouseService CheckTransaction 1: %v", err)
+		return err
+	}
+
+	curr_status := TransInfo.Status
+	if curr_status != "draft" {
+		log.Printf("*WarehouseService CheckTransaction 1: %v", err)
+		msg := fmt.Sprintf("error status saat ini bukan draft! saat ini %v", curr_status)
+		return errors.New(msg)
+	}
+
+	err = tx.AllocateItem(ctx, transaction_number, identifier)
+	if err != nil {
+		log.Printf("*WarehouseService AllocateItem 1: %v", err)
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		log.Printf("errr AllocateItem Commit %v", err)
+		return err
+	}
+
+	return nil
 }

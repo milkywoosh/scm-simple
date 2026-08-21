@@ -50,8 +50,6 @@ type CreateDraftWarehouseTransferParams struct {
 	LocationDestination string `json:"location_destination"`
 }
 
-
-
 // CreateDraftWarehouseTransfer godoc
 // @Summary      Create New Draft Transaction
 // @Description  Create New Draft Transaction Warehouse to Warehouse
@@ -88,4 +86,47 @@ func (s *Server) CreateDraftWarehouseTransfer(w http.ResponseWriter, req *http.R
 	internals.WriteResponse(w, http.StatusAccepted, DataResp)
 	return
 
+}
+
+type InputItemWarehouseTransferParams struct {
+	Identifier string `json:"identifier"`
+}
+
+// InputItemWarehouseTransfer godoc
+// @Summary      Input each item one by one(serial_number) in Transaction
+// @Description  User scan identifier for each item that will be delivered as ALLOCATED
+// @Tags         warehouse_service item_transfer
+// @Accept       json
+// @Produce      json
+// @Param		 request        body      InputItemWarehouseTransferParams  true  "item transfer payload"
+// @Param		 request        path      transaction_number  true  "transaction number identifier"
+// @Success      200  {object}  map[string]any
+// @Failure      400  {string}  ErrorResponse
+// @Router       /api/v1/warehouse/input-item/:transaction_number [post]
+func (s *Server) InputItemWarehouseTransfer(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
+
+	ctx := req.Context()
+
+	var ReqBody InputItemWarehouseTransferParams
+	TransactionNumber := pathParam.ByName("transaction_number")
+
+	DataResp := make(map[string]any)
+
+	// read input from Body
+	errDecode := json.NewDecoder(req.Body).Decode(&ReqBody)
+	if errDecode != nil {
+		DataResp["message"] = "error parsing request body"
+		internals.WriteResponse(w, http.StatusBadRequest, DataResp)
+		return
+	}
+
+	err := s.service.WarehouseService.AllocateItem(ctx, TransactionNumber, ReqBody.Identifier)
+	if err != nil {
+		internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+		return
+	}
+
+	DataResp["message"] = "return okay"
+	internals.WriteResponse(w, http.StatusAccepted, DataResp)
+	return
 }

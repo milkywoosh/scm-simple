@@ -32,20 +32,24 @@ type LocationRow struct {
 }
 
 type TransactionInfo struct {
-	Transaction_number string
-	Created_by         string
-	Submitted_at       string
-	Approved_at        string
-	Canceled_at        string
-	Transaction_type   string
+	Id                string
+	TransactionNumber string
+	Status            string
+	Origin            string
+	Destination       string
+	TransactionType   string
+	CreatedAt         string
+	SubmittedAt       string
+	ApprovedAt        string
+	CanceledAt        string
 }
 
 type LocationRepository interface {
 	GetLocation(ctx context.Context, locationCode string, typeLocation LocationType) ([]LocationRow, error)
 	NewDraftTransaction(ctx context.Context, transaction_number, transaction_type, origin, destination string) (TransactionInfo, error)
-	CheckTransaction(transaction_number string) error
+	CheckTransaction(ctx context.Context, transaction_number string) (TransactionInfo, error)
 	// literary like a location send items
-	SendItem(ctx context.Context, transaction_number, origin, destination, item string) error
+	AllocateItem(ctx context.Context, transaction_number, item string) error
 	// literary like a location receive items
 	ReceiveItem(ctx context.Context, transaction_number, destination, origin string, item string) error
 }
