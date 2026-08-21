@@ -21,8 +21,9 @@ func (a *WarehouseService) WarehouseInfo(ctx context.Context, location_code stri
 }
 
 type WarehouseTransferHeader struct {
-	TransactionNumber string
-	Status            string
+	TransactionNumber string `json:"transaction_number"`
+	Status            string `json:"status"`
+	TransactionType   string `json:"transaction_type"`
 }
 
 type WarehouseReceiveDraft struct {
@@ -60,6 +61,7 @@ func (a *WarehouseService) CreateDraftTx(ctx context.Context, location_origin, l
 
 	n.TransactionNumber = new_transaction.TransactionNumber
 	n.Status = new_transaction.Status
+	n.Status = new_transaction.Status
 	return n, nil
 }
 
@@ -81,7 +83,6 @@ func (a *WarehouseService) AllocateItem(ctx context.Context, transaction_number,
 
 	curr_status := TransInfo.Status
 	if curr_status != "draft" {
-		log.Printf("*WarehouseService CheckTransaction 1: %v", err)
 		msg := fmt.Sprintf("error status saat ini bukan draft! saat ini %v", curr_status)
 		return errors.New(msg)
 	}
@@ -95,6 +96,44 @@ func (a *WarehouseService) AllocateItem(ctx context.Context, transaction_number,
 	err = tx.Commit(ctx)
 	if err != nil {
 		log.Printf("errr AllocateItem Commit %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *WarehouseService) DisAllocateItem(ctx context.Context, transaction_number, identifier string) error {
+	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
+
+	if err != nil {
+		log.Printf("*WarehouseService DisAllocateItem 1: %v", err)
+		return err
+	}
+
+	defer tx.Rollback(ctx)
+
+	TransInfo, err := tx.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		log.Printf("*WarehouseService CheckTransaction DisAllocateItem 1: %v", err)
+		return err
+	}
+
+	curr_status := TransInfo.Status
+	if curr_status != "draft" {
+		log.Printf("*WarehouseService CheckTransaction DisAllocateItem 1: %v", err)
+		msg := fmt.Sprintf("error status saat ini bukan draft! saat ini %v", curr_status)
+		return errors.New(msg)
+	}
+
+	err = tx.DisAllocateItem(ctx, transaction_number, identifier)
+	if err != nil {
+		log.Printf("*WarehouseService DisAllocateItem 2: %v", err)
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		log.Printf("errr DisAllocateItem Commit %v", err)
 		return err
 	}
 
@@ -131,6 +170,39 @@ func (a *WarehouseService) SetSubmit(ctx context.Context, transaction_number str
 	err = tx.Commit(ctx)
 	if err != nil {
 		log.Printf("err SetStatusTransaction submit commit 1: %s", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (a *WarehouseService) SetApprove(ctx context.Context, transaction_number string) error {
+
+	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	TransactionInfo, err := tx.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		return err
+	}
+
+	CurrStatus := TransactionInfo.Status
+	if CurrStatus != "draft" {
+		msg := fmt.Sprintf("status transaksi saat ini bukan submitted tapi %s", CurrStatus)
+		return errors.New(msg)
+	}
+
+	err = tx.SetStatusTransaction(ctx, transaction_number, "approved")
+	if err != nil {
+		log.Printf("err SetStatusTransaction approve: %s", err.Error())
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		log.Printf("err SetStatusTransaction approve commit 1: %s", err.Error())
 		return err
 	}
 	return nil

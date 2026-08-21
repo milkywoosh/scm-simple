@@ -21,6 +21,11 @@ definitions:
       location_origin:
         type: string
     type: object
+  api.DisallocateItemWarehouseTransferParams:
+    properties:
+      identifier:
+        type: string
+    type: object
   api.InputItemWarehouseTransferParams:
     properties:
       identifier:
@@ -63,6 +68,39 @@ paths:
           schema:
             type: string
       summary: Create New Draft Transaction
+      tags:
+      - warehouse_service item_transfer
+  /api/v1/warehouse/disallocate-item/:transaction_number:
+    post:
+      consumes:
+      - application/json
+      description: User scan identifier for each item that will be takenout as set
+        to be
+      parameters:
+      - description: item transfer payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.DisallocateItemWarehouseTransferParams'
+      - description: transaction number identifier
+        in: path
+        name: request
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Takeout each item one by one(serial_number) in Transaction
       tags:
       - warehouse_service item_transfer
   /api/v1/warehouse/input-item/:transaction_number:

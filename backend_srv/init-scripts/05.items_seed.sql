@@ -36,6 +36,7 @@ CREATE TABLE item_histories (
     id BIGSERIAL PRIMARY KEY,
     item_id INTEGER NOT NULL,
     transaction_number VARCHAR(60) NOT NULL,
+    previous_status item_status_enum NOT NULL, -- for disallocating
     status_history item_status_enum NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_item_histories_item
@@ -116,35 +117,25 @@ INSERT INTO items (
 INSERT INTO item_histories (
     item_id,
     transaction_number,
+    previous_status,
     status_history,
     created_at
 )
 SELECT
     i.id,
     x.transaction_number,
+    x.previous_status::item_status_enum,
     x.status_history::item_status_enum,
     x.created_at
 FROM (
     VALUES
-        ('ITM000000000001', 'TRX-2026-000001', 'AVAILABLE', '2026-01-10 08:30:00+07'::timestamptz),
-
-        ('ITM000000000002', 'TRX-2026-000002', 'AVAILABLE', '2026-01-12 09:15:00+07'::timestamptz),
-        ('ITM000000000002', 'TRX-2026-000002', 'INTECH',    '2026-01-13 14:20:00+07'::timestamptz),
-
-        ('ITM000000000003', 'TRX-2026-000003', 'AVAILABLE', '2026-01-15 10:00:00+07'::timestamptz),
-        ('ITM000000000003', 'TRX-2026-000003', 'ALLOCATED', '2026-01-16 09:30:00+07'::timestamptz),
-
-        ('ITM000000000004', 'TRX-2026-000004', 'AVAILABLE', '2026-01-20 11:30:00+07'::timestamptz),
-        ('ITM000000000004', 'TRX-2026-000004', 'ALLOCATED', '2026-01-21 08:45:00+07'::timestamptz),
-        ('ITM000000000004', 'TRX-2026-000004', 'INSTALLED', '2026-01-22 15:10:00+07'::timestamptz),
-
-        ('ITM000000000005', 'TRX-2026-000005', 'AVAILABLE', '2026-01-25 13:45:00+07'::timestamptz),
-        ('ITM000000000005', 'TRX-2026-000005', 'ALLOCATED', '2026-01-26 09:00:00+07'::timestamptz),
-        ('ITM000000000005', 'TRX-2026-000005', 'INSTALLED', '2026-01-27 10:30:00+07'::timestamptz),
-        ('ITM000000000005', 'TRX-2026-000005', 'DEPLOYED', '2026-01-28 16:00:00+07'::timestamptz)
+        ('ITM000000000001', 'TRX-2026-000001', 'ALLOCATED', 'AVAILABLE', '2026-01-10 08:30:00+07'::timestamptz),
+        ('ITM000000000002', 'TRX-2026-000002', 'ALLOCATED', 'AVAILABLE', '2026-01-12 09:15:00+07'::timestamptz),
+        ('ITM000000000002', 'TRX-2026-000002', 'ALLOCATED', 'INTECH',    '2026-01-13 14:20:00+07'::timestamptz)
 ) AS x(
     serial_number,
     transaction_number,
+    previous_status,
     status_history,
     created_at
 )

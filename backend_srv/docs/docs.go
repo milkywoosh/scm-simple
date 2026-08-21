@@ -63,6 +63,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/warehouse/disallocate-item/:transaction_number": {
+            "post": {
+                "description": "User scan identifier for each item that will be takenout as set to be",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "warehouse_service item_transfer"
+                ],
+                "summary": "Takeout each item one by one(serial_number) in Transaction",
+                "parameters": [
+                    {
+                        "description": "item transfer payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.DisallocateItemWarehouseTransferParams"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "transaction number identifier",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/warehouse/input-item/:transaction_number": {
             "post": {
                 "description": "User scan identifier for each item that will be delivered as ALLOCATED",
@@ -277,6 +325,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "location_origin": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.DisallocateItemWarehouseTransferParams": {
+            "type": "object",
+            "properties": {
+                "identifier": {
                     "type": "string"
                 }
             }
