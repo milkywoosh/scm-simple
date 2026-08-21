@@ -48,7 +48,7 @@ INSERT INTO transaction_item_transfers (
 ) VALUES
 (
     'TRX-2026-000001',
-    'APPROVED',
+    'approved',
     'procurement',
     'FACTORY',
     'WH-JKT-01',
@@ -58,7 +58,7 @@ INSERT INTO transaction_item_transfers (
 ),
 (
     'TRX-2026-000002',
-    'APPROVED',
+    'approved',
     'warehouse_to_warehouse',
     'WH-JKT-01',
     'TECH-JKT-01',
@@ -68,7 +68,7 @@ INSERT INTO transaction_item_transfers (
 ),
 (
     'TRX-2026-000003',
-    'APPROVED',
+    'approved',
     'warehouse_to_warehouse',
     'WH-JKT-01',
     'WH-BDG-01',
@@ -78,7 +78,7 @@ INSERT INTO transaction_item_transfers (
 ),
 (
     'TRX-2026-000004',
-    'APPROVED',
+    'approved',
     'installation',
     'WH-BDG-01',
     'SITE-BDG-001',
@@ -88,7 +88,7 @@ INSERT INTO transaction_item_transfers (
 ),
 (
     'TRX-2026-000005',
-    'APPROVED',
+    'approved',
     'deployment',
     'SITE-BDG-001',
     'SITE-JKT-001',
