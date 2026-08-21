@@ -96,35 +96,25 @@ func (d *DBLocationRepository) NewDraftTransaction(ctx context.Context, transact
 
 }
 
-func (d *DBLocationRepository) SetStatusTransaction(ctx context.Context, transaction_number, transaction_type, origin, destination string) (domain.TransactionInfo, error) {
+func (d *DBLocationRepository) SetStatusTransaction(ctx context.Context, transaction_number, status string) error {
 
 	query :=
-		`INSERT INTO transaction_item_transfers (
-			transaction_number, 
-			transaction_type,
-			origin, 
-			destination
-		) VALUES (
-		 	$1, $2, $3, $4
-		)`
+		`UPDATE transaction_item_transfers
+			set status = $1
+		WHERE transaction_number = $2
+		`
 
 	_, err := d.Conn.Exec(
 		ctx,
 		query,
+		status,
 		transaction_number,
-		transaction_type,
-		origin,
-		destination,
 	)
 	if err != nil {
-		return domain.TransactionInfo{}, err
+		return err
 	}
 
-	n := domain.TransactionInfo{}
-	n.TransactionNumber = transaction_number
-	n.TransactionType = transaction_type
-
-	return n, nil
+	return nil
 
 }
 
@@ -134,13 +124,15 @@ func (d *DBLocationRepository) AllocateItem(ctx context.Context, transaction_num
 	// insert detail transaction
 
 	query1 := `
-		update items i
-			set i.curr_status = 'ALLOCATED'
-		where i.serial_number = $1
-			and i.curr_transaction is null
-		returning i.id
+		update items
+			set curr_status = 'ALLOCATED',
+				curr_transaction = $2
+
+		where serial_number = $1
+			and curr_transaction is null
+		returning id
 	`
-	row := d.Conn.QueryRow(ctx, query1, item)
+	row := d.Conn.QueryRow(ctx, query1, item, transaction_number)
 
 	var item_id int
 	err := row.Scan(&item_id)
@@ -159,7 +151,7 @@ func (d *DBLocationRepository) AllocateItem(ctx context.Context, transaction_num
 			$1, $2, $3, CURRENT_TIMESTAMP
 		)
 	`
-	_, err = d.Conn.Exec(ctx, query2, item, transaction_number, "ALLOCATED")
+	_, err = d.Conn.Exec(ctx, query2, item_id, transaction_number, "ALLOCATED")
 	log.Printf("err insert into item_histories")
 	if err != nil {
 		return err
@@ -210,7 +202,7 @@ func (d *DBLocationRepository) CheckTransaction(ctx context.Context, transaction
 			where t.transaction_number = $1
 	`
 
-	data := domain.TransactionInfo{}
+	var data domain.TransactionInfo
 
 	row := d.Conn.QueryRow(ctx, query, transaction_number)
 

@@ -38,16 +38,17 @@ type TransactionInfo struct {
 	Origin            string
 	Destination       string
 	TransactionType   string
-	CreatedAt         string
-	SubmittedAt       string
-	ApprovedAt        string
-	CanceledAt        string
+	CreatedAt         internals.NullTime
+	SubmittedAt       internals.NullTime
+	ApprovedAt        internals.NullTime
+	CanceledAt        internals.NullTime
 }
 
 type LocationRepository interface {
 	GetLocation(ctx context.Context, locationCode string, typeLocation LocationType) ([]LocationRow, error)
 	NewDraftTransaction(ctx context.Context, transaction_number, transaction_type, origin, destination string) (TransactionInfo, error)
 	CheckTransaction(ctx context.Context, transaction_number string) (TransactionInfo, error)
+	SetStatusTransaction(ctx context.Context, transaction_number, status string) error
 	// literary like a location send items
 	AllocateItem(ctx context.Context, transaction_number, item string) error
 	// literary like a location receive items

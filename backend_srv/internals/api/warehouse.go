@@ -99,7 +99,7 @@ type InputItemWarehouseTransferParams struct {
 // @Accept       json
 // @Produce      json
 // @Param		 request        body      InputItemWarehouseTransferParams  true  "item transfer payload"
-// @Param		 request        path      transaction_number  true  "transaction number identifier"
+// @Param		 request        path      string  true  "transaction number identifier"
 // @Success      200  {object}  map[string]any
 // @Failure      400  {string}  ErrorResponse
 // @Router       /api/v1/warehouse/input-item/:transaction_number [post]
@@ -128,5 +128,35 @@ func (s *Server) InputItemWarehouseTransfer(w http.ResponseWriter, req *http.Req
 
 	DataResp["message"] = "return okay"
 	internals.WriteResponse(w, http.StatusAccepted, DataResp)
+	return
+}
+
+// SetStatusTransaction godoc
+// @Summary      set update status Transaction
+// @Description  Authorized User can update transaction process ("submitted", "rejected", "canceled", "approved")
+// @Tags         warehouse_service item_transfer
+// @Accept       json
+// @Produce      json
+// @Param		 request        path      string  true  "transaction number identifier"
+// @Param		 request        path      string  true  "status to update"
+// @Success      200  {object}  map[string]any
+// @Failure      400  {string}  ErrorResponse
+// @Router       /api/v1/warehouse/set-status/:transaction_number/:status [put]
+func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
+
+	ctx := req.Context()
+	TransactionNumber := pathParam.ByName("transaction_number")
+
+	err := s.service.WarehouseService.SetSubmit(ctx, TransactionNumber)
+	if err != nil {
+		internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+		return
+	}
+
+	RespData := make(map[string]any)
+	RespData["message"] = "update status submit berhasil"
+	RespData["transaction_number"] = TransactionNumber
+
+	internals.WriteResponse(w, http.StatusAccepted, RespData)
 	return
 }

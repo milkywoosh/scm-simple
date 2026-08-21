@@ -100,3 +100,38 @@ func (a *WarehouseService) AllocateItem(ctx context.Context, transaction_number,
 
 	return nil
 }
+
+func (a *WarehouseService) SetSubmit(ctx context.Context, transaction_number string) error {
+
+	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback(ctx)
+
+	TransactionInfo, err := tx.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		return err
+	}
+
+	CurrStatus := TransactionInfo.Status
+	if CurrStatus != "draft" {
+		msg := fmt.Sprintf("status transaksi saat ini bukan draft tapi %s", CurrStatus)
+		return errors.New(msg)
+	}
+
+	err = tx.SetStatusTransaction(ctx, transaction_number, "submitted")
+	if err != nil {
+		log.Printf("err SetStatusTransaction submit: %s", err.Error())
+		log.Printf("err SetStatusTransaction submit: %s", err.Error())
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		log.Printf("err SetStatusTransaction submit commit 1: %s", err.Error())
+		return err
+	}
+	return nil
+}
