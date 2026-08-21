@@ -120,14 +120,7 @@ func (s *Server) userRoutes() {
 	// s.route.POST("/api/user/v1/verify-secret-code", s.VerifyEmailSecretCode)
 }
 
-func (s *Server) stockTransferRoutes() {
-	s.route.POST("/stock-transfer/v1/create", nil)
-	s.route.GET("/stock-transfer/v1/header", nil)
-	s.route.PUT("/stock-transfer/v1/submit", nil)
-	s.route.PUT("/stock-transfer/v1/reject", nil)
-	s.route.PUT("/stock-transfer/v1/approve", nil)
-	s.route.PUT("/stock-transfer/v1/cancel", nil)
-}
+func (s *Server) stockTransferRoutes() {}
 
 func (s *Server) Start(addr string) error {
 	return s.srvInit.ListenAndServe()
