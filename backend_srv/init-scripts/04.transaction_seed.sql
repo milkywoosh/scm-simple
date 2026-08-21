@@ -4,6 +4,7 @@ CREATE TYPE type_of_trans AS ENUM ('warehouse_to_warehouse', 'warehouse_to_techn
 CREATE TABLE transaction_item_transfers (
     id serial primary key ,
     transaction_number VARCHAR(60) NOT NULL UNIQUE,
+    status VARCHAR(20) NOT NULL,
     transaction_type type_of_trans,
     origin VARCHAR(60),
     destination VARCHAR(60),
