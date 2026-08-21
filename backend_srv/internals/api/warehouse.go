@@ -176,7 +176,7 @@ func (s *Server) DisallocateItemWarehouseTransfer(w http.ResponseWriter, req *ht
 
 // SetStatusTransaction godoc
 // @Summary      set update status Transaction
-// @Description  Authorized User can update transaction process ("submitted", "rejected", "canceled", "approved")
+// @Description  Authorized User can update transaction process ("submit", "reject", "cancel", "approve")
 // @Tags         warehouse_service item_transfer
 // @Accept       json
 // @Produce      json
@@ -189,17 +189,35 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 
 	ctx := req.Context()
 	TransactionNumber := pathParam.ByName("transaction_number")
+	SetStatus := pathParam.ByName("status")
 
-	err := s.service.WarehouseService.SetSubmit(ctx, TransactionNumber)
-	if err != nil {
-		internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+	if SetStatus == "submit" {
+		err := s.service.WarehouseService.SetSubmit(ctx, TransactionNumber)
+		if err != nil {
+			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			return
+		}
+
+		RespData := make(map[string]any)
+		RespData["message"] = "update status submit berhasil"
+		RespData["transaction_number"] = TransactionNumber
+
+		internals.WriteResponse(w, http.StatusAccepted, RespData)
 		return
+		internals.WriteResponse(w, http.StatusAccepted, RespData)
+	} else if SetStatus == "cancel" {
+		internals.WriteErrorResponse(w, http.StatusForbidden, "proses ini belum dapat dilakukan")
+		return
+	} else if SetStatus == "cancel" {
+		internals.WriteErrorResponse(w, http.StatusForbidden, "proses ini belum dapat dilakukan")
+		return
+	} else if SetStatus == "approve" {
+		internals.WriteErrorResponse(w, http.StatusForbidden, "proses ini belum dapat dilakukan")
+		return
+	} else {
+		internals.WriteErrorResponse(w, http.StatusForbidden, "proses ini tidak dapat dilakukan")
+		return
+
 	}
 
-	RespData := make(map[string]any)
-	RespData["message"] = "update status submit berhasil"
-	RespData["transaction_number"] = TransactionNumber
-
-	internals.WriteResponse(w, http.StatusAccepted, RespData)
-	return
 }
