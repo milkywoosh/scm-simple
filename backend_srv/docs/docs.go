@@ -63,6 +63,100 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/warehouse/input-item/:transaction_number": {
+            "post": {
+                "description": "User scan identifier for each item that will be delivered as ALLOCATED",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "warehouse_service item_transfer"
+                ],
+                "summary": "Input each item one by one(serial_number) in Transaction",
+                "parameters": [
+                    {
+                        "description": "item transfer payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.InputItemWarehouseTransferParams"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "transaction number identifier",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/warehouse/set-status/:transaction_number/:status": {
+            "put": {
+                "description": "Authorized User can update transaction process (\"submitted\", \"rejected\", \"canceled\", \"approved\")",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "warehouse_service item_transfer"
+                ],
+                "summary": "set update status Transaction",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "transaction number identifier",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "status to update",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/warehouse/:location_code": {
             "get": {
                 "description": "Search location by location code, customer, technician, warehouse",
@@ -183,6 +277,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "location_origin": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.InputItemWarehouseTransferParams": {
+            "type": "object",
+            "properties": {
+                "identifier": {
                     "type": "string"
                 }
             }
