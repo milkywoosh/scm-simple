@@ -131,6 +131,49 @@ func (s *Server) InputItemWarehouseTransfer(w http.ResponseWriter, req *http.Req
 	return
 }
 
+type DisallocateItemWarehouseTransferParams struct {
+	Identifier string `json:"identifier"`
+}
+
+// DisallocateItemWarehouseTransfer godoc
+// @Summary      Takeout each item one by one(serial_number) in Transaction
+// @Description  User scan identifier for each item that will be takenout as set to be
+// @Tags         warehouse_service item_transfer
+// @Accept       json
+// @Produce      json
+// @Param		 request        body      DisallocateItemWarehouseTransferParams  true  "item transfer payload"
+// @Param		 request        path      string  true  "transaction number identifier"
+// @Success      200  {object}  map[string]any
+// @Failure      400  {string}  ErrorResponse
+// @Router       /api/v1/warehouse/disallocate-item/:transaction_number [post]
+func (s *Server) DisallocateItemWarehouseTransfer(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
+
+	ctx := req.Context()
+
+	var ReqBody DisallocateItemWarehouseTransferParams
+	TransactionNumber := pathParam.ByName("transaction_number")
+
+	DataResp := make(map[string]any)
+
+	// read input from Body
+	errDecode := json.NewDecoder(req.Body).Decode(&ReqBody)
+	if errDecode != nil {
+		DataResp["message"] = "error parsing request body"
+		internals.WriteResponse(w, http.StatusBadRequest, DataResp)
+		return
+	}
+
+	err := s.service.WarehouseService.DisAllocateItem(ctx, TransactionNumber, ReqBody.Identifier)
+	if err != nil {
+		internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+		return
+	}
+
+	DataResp["message"] = "return okay"
+	internals.WriteResponse(w, http.StatusAccepted, DataResp)
+	return
+}
+
 // SetStatusTransaction godoc
 // @Summary      set update status Transaction
 // @Description  Authorized User can update transaction process ("submitted", "rejected", "canceled", "approved")

@@ -72,7 +72,7 @@ func (d *DBLocationRepository) NewDraftTransaction(ctx context.Context, transact
 			origin, 
 			destination
 		) VALUES (
-		 	$1, $2, $3, $4
+		 	$1, $2, $3, $4, $5
 		)`
 
 	_, err := d.Conn.Exec(
@@ -91,6 +91,7 @@ func (d *DBLocationRepository) NewDraftTransaction(ctx context.Context, transact
 	n := domain.TransactionInfo{}
 	n.TransactionNumber = transaction_number
 	n.TransactionType = transaction_type
+	n.Status = "draft"
 
 	return n, nil
 
@@ -118,48 +119,56 @@ func (d *DBLocationRepository) SetStatusTransaction(ctx context.Context, transac
 
 }
 
-func (d *DBLocationRepository) AllocateItem(ctx context.Context, transaction_number, item string) error {
+func (d *DBLocationRepository) AllocateItem(ctx context.Context, transaction_number, identifier string) error {
+	// update items allocated
+	// insert detail history
+	// insert detail transaction
+
 	// update items allocated
 	// insert detail history
 	// insert detail transaction
 
 	query1 := `
-		update items
-			set curr_status = 'ALLOCATED',
-				curr_transaction = $2
-
-		where serial_number = $1
-			and curr_transaction is null
-		returning id
+		insert into item_histories (
+			item_id,
+			transaction_number,
+			previous_status,
+			status_history,
+			created_at
+		) values (
+			(select id from items i where i.serial_number = $1), 
+			$2, 
+			(select curr_status from items i where i.serial_number = $1), 
+			$3 , 
+			CURRENT_TIMESTAMP
+		)
 	`
-	row := d.Conn.QueryRow(ctx, query1, item, transaction_number)
-
-	var item_id int
-	err := row.Scan(&item_id)
+	_, err := d.Conn.Exec(ctx, query1, identifier, transaction_number, "ALLOCATED")
 	if err != nil {
-		log.Printf("err update allocated: %v", err)
+		log.Printf("err insert into item_histories: %v", err)
 		return err
 	}
 
 	query2 := `
-		insert into item_histories (
-			item_id,
-			transaction_number,
-			status_history,
-			created_at
-		) values (
-			$1, $2, $3, CURRENT_TIMESTAMP
-		)
+		update items
+			set curr_status = 'ALLOCATED',
+				curr_transaction = $2
+		where serial_number = $1
+			and curr_transaction is null
+		returning id
 	`
-	_, err = d.Conn.Exec(ctx, query2, item_id, transaction_number, "ALLOCATED")
-	log.Printf("err insert into item_histories")
+	row := d.Conn.QueryRow(ctx, query2, identifier, transaction_number)
+
+	var item_id int
+	err = row.Scan(&item_id)
 	if err != nil {
+		log.Printf("err update AllocateItem: %v", err)
 		return err
 	}
 
 	TransInfo, err := d.CheckTransaction(ctx, transaction_number)
-	log.Printf("err insert into CheckTransaction Allocate item")
 	if err != nil {
+		log.Printf("err insert into CheckTransaction Allocate item, %v", err)
 		return err
 	}
 
@@ -172,14 +181,70 @@ func (d *DBLocationRepository) AllocateItem(ctx context.Context, transaction_num
 			$1, $2, CURRENT_TIMESTAMP
 		)
 	`
-	_, err = d.Conn.Exec(ctx, query3, TransInfo.Id, item)
-	log.Printf("err insert into item_histories")
+	_, err = d.Conn.Exec(ctx, query3, TransInfo.Id, identifier)
 	if err != nil {
+		log.Printf("err insert into item_histories: %v", err)
 		return err
 	}
 
 	return nil
 
+}
+
+func (d *DBLocationRepository) DisAllocateItem(ctx context.Context, transaction_number, identifier string) error {
+
+	query2 := `
+		update items
+			set curr_status = (
+					select 
+						previous_status 
+					from item_histories ih 
+						where ih.item_id = (select id from items where serial_number = $1) 
+							and (ih.transaction_number = $2)
+				),
+				curr_transaction = null
+		where serial_number = $1
+			and curr_transaction = $2
+		returning id
+	`
+	row := d.Conn.QueryRow(ctx, query2, identifier, transaction_number)
+
+	var item_id int
+	err := row.Scan(&item_id)
+	if err != nil {
+		log.Printf("err update disAllocateItem: %v", err)
+		return err
+	}
+
+	query1 := `
+		delete from item_histories 
+			where item_id = (select id from items where serial_number = $1) 
+				and (transaction_number = $2)
+	`
+	_, err = d.Conn.Exec(ctx, query1, identifier, transaction_number)
+	if err != nil {
+		log.Printf("err delete from item_histories disallocate: %v", err)
+		return err
+	}
+
+	TransInfo, err := d.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		log.Printf("err insert into CheckTransaction Allocate item, %v", err)
+		return err
+	}
+
+	query3 := `
+		delete from transaction_item_transfer_details 
+			where (id_trans_item_transfer = $1)
+				and (identifier_item = $2)
+	`
+	_, err = d.Conn.Exec(ctx, query3, TransInfo.Id, identifier)
+	if err != nil {
+		log.Printf("err insert into item_histories: %v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (d *DBLocationRepository) ReceiveItem(ctx context.Context, transaction_number, from string, to string, item string) error {

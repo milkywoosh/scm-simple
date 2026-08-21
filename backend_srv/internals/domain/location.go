@@ -51,6 +51,7 @@ type LocationRepository interface {
 	SetStatusTransaction(ctx context.Context, transaction_number, status string) error
 	// literary like a location send items
 	AllocateItem(ctx context.Context, transaction_number, item string) error
+	DisAllocateItem(ctx context.Context, transaction_number, item string) error
 	// literary like a location receive items
 	ReceiveItem(ctx context.Context, transaction_number, destination, origin string, item string) error
 }
