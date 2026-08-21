@@ -1,0 +1,24 @@
+package domain
+
+import (
+	"context"
+
+	"scm-simple-luke.com/dir/internals"
+)
+
+type ItemInfo struct {
+	Id                    string               `json:"id"`
+	Serial_number         string               `json:"serial_number"`
+	Factory_serial_number string               `json:"factory_serial_number"`
+	Created_at            internals.NullTime   `json:"created_at"`
+	Curr_status           string               `json:"curr_status"`
+	Curr_transaction      internals.NullString `json:"curr_transaction"`
+	Curr_location_code    string               `json:"curr_location_code"`
+	Product_code          string               `json:"product_code"`
+	Introduction_number   string               `json:"introduction_number"`
+}
+
+type ItemRepository interface {
+	// note kalo error balikin aray kosong aja(?)
+	GetItem(ctx context.Context, identifier string) ([]ItemInfo, error)
+}
