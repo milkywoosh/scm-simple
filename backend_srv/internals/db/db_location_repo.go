@@ -247,6 +247,42 @@ func (d *DBLocationRepository) DisAllocateItem(ctx context.Context, transaction_
 	return nil
 }
 
+func (d *DBLocationRepository) GetItemsOnTransaction(ctx context.Context, transaction_number string) ([]domain.ListItemsTransaction, error) {
+
+	query := `
+			select * from transaction_item_transfer_details t 
+			where t.id_trans_item_transfer = (
+				select id 
+				from transaction_item_transfers t1 
+				where t1.transaction_number  = $1
+			)
+	`
+	rows, err := d.Conn.Query(ctx, query, transaction_number)
+	if err != nil {
+		log.Printf("err query GetItemsOnTransaction 1: %s", err.Error())
+		return []domain.ListItemsTransaction{}, err
+	}
+
+	datas := []domain.ListItemsTransaction{}
+
+	for rows.Next() {
+
+		var data domain.ListItemsTransaction
+		if err := rows.Scan(
+			&data.Id,
+			&data.IdTransfer,
+			&data.SerialNumber,
+			&data.AddedAt,
+		); err != nil {
+			log.Printf("err loop list items: %s", err.Error())
+			return []domain.ListItemsTransaction{}, err
+		}
+
+		datas = append(datas, data)
+	}
+	return datas, nil
+}
+
 func (d *DBLocationRepository) ReceiveItem(ctx context.Context, transaction_number, from string, to string, item string) error {
 	return nil
 }

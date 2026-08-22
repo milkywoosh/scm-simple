@@ -54,6 +54,7 @@ type LocationRepository interface {
 	DisAllocateItem(ctx context.Context, transaction_number, item string) error
 	// literary like a location receive items
 	ReceiveItem(ctx context.Context, transaction_number, destination, origin string, item string) error
+	GetItemsOnTransaction(ctx context.Context, transaction_number string) ([]ListItemsTransaction, error)
 }
 
 type StockTransfer interface {

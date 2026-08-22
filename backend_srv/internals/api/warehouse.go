@@ -199,23 +199,44 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 		}
 
 		RespData := make(map[string]any)
-		RespData["message"] = "update status submit berhasil"
+		RespData["message"] = "update status berhasil"
 		RespData["transaction_number"] = TransactionNumber
 
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
 		return
+	} else if SetStatus == "cancel" {
+
+		err := s.service.WarehouseService.SetCancel(ctx, TransactionNumber)
+		if err != nil {
+			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			return
+		}
+
+		RespData := make(map[string]any)
+		RespData["message"] = "update status berhasil"
+		RespData["transaction_number"] = TransactionNumber
+
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
-	} else if SetStatus == "cancel" {
-		internals.WriteErrorResponse(w, http.StatusForbidden, "proses ini belum dapat dilakukan")
 		return
-	} else if SetStatus == "cancel" {
-		internals.WriteErrorResponse(w, http.StatusForbidden, "proses ini belum dapat dilakukan")
+	} else if SetStatus == "reject" {
+		err := s.service.WarehouseService.SetReject(ctx, TransactionNumber)
+		if err != nil {
+			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			return
+		}
+
+		RespData := make(map[string]any)
+		RespData["message"] = "update status berhasil"
+		RespData["transaction_number"] = TransactionNumber
+
+		internals.WriteResponse(w, http.StatusAccepted, RespData)
 		return
+
 	} else if SetStatus == "approve" {
-		internals.WriteErrorResponse(w, http.StatusForbidden, "proses ini belum dapat dilakukan")
+		internals.WriteErrorResponse(w, http.StatusForbidden, "Proses ini belum dapat dilakukan")
 		return
 	} else {
-		internals.WriteErrorResponse(w, http.StatusForbidden, "proses ini tidak dapat dilakukan")
+		internals.WriteErrorResponse(w, http.StatusBadRequest, "Proses ini tidak dapat dilakukan. Request tersedia hanya ada (submit, cancel, reject, approve)")
 		return
 
 	}

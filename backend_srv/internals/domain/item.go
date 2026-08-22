@@ -22,3 +22,10 @@ type ItemRepository interface {
 	// note kalo error balikin aray kosong aja(?)
 	GetItem(ctx context.Context, identifier string) ([]ItemInfo, error)
 }
+
+type ListItemsTransaction struct {
+	Id           int32              `json:"id"` // int32 adjust serial pgdata type as int4
+	IdTransfer   int32              `json:"id_trans_item_transfer"`
+	SerialNumber string             `json:"identifier_item"`
+	AddedAt      internals.NullTime `json:"added_at"`
+}

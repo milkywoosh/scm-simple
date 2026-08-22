@@ -174,8 +174,7 @@ func (a *WarehouseService) SetSubmit(ctx context.Context, transaction_number str
 	}
 	return nil
 }
-
-func (a *WarehouseService) SetApprove(ctx context.Context, transaction_number string) error {
+func (a *WarehouseService) SetReject(ctx context.Context, transaction_number string) error {
 
 	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
 	if err != nil {
@@ -189,7 +188,98 @@ func (a *WarehouseService) SetApprove(ctx context.Context, transaction_number st
 	}
 
 	CurrStatus := TransactionInfo.Status
-	if CurrStatus != "draft" {
+	if CurrStatus == "approved" {
+		msg := fmt.Sprintf("Status transaksi sudah %s, tidak dapat diubah kembali.", CurrStatus)
+		return errors.New(msg)
+	}
+
+	if CurrStatus == "draft" || CurrStatus == "canceled" {
+		msg := fmt.Sprintf("Status transaksi saat ini %s, tidak dapat melalukan reject.", CurrStatus)
+		return errors.New(msg)
+	}
+
+	err = tx.SetStatusTransaction(ctx, transaction_number, "draft")
+	if err != nil {
+		log.Printf("err SetStatusTransaction reject: %s", err.Error())
+		log.Printf("err SetStatusTransaction reject: %s", err.Error())
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		log.Printf("err SetStatusTransaction reject commit 1: %s", err.Error())
+		return err
+	}
+	return nil
+}
+func (a *WarehouseService) SetCancel(ctx context.Context, transaction_number string) error {
+
+	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	TransactionInfo, err := tx.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		return err
+	}
+
+	CurrStatus := TransactionInfo.Status
+	if CurrStatus == "approved" || CurrStatus == "canceled" {
+		msg := fmt.Sprintf("Status transaksi sudah %s, tidak dapat diubah kembali.", CurrStatus)
+		return errors.New(msg)
+	}
+
+	if CurrStatus == "submitted" {
+		msg := fmt.Sprintf("Status transaksi saat ini %s, silahkan reject terlebih dahulu.", CurrStatus)
+		return errors.New(msg)
+	}
+
+	// get list item on a transaction
+	ListItems, err := tx.GetItemsOnTransaction(ctx, transaction_number)
+	if err != nil {
+		return err
+	}
+	// loop here
+	for _, val := range ListItems {
+		err = tx.DisAllocateItem(ctx, transaction_number, val.SerialNumber)
+		if err != nil {
+			log.Printf("*WarehouseService DisAllocateItem 2: %v", err)
+			return err
+		}
+	}
+
+	err = tx.SetStatusTransaction(ctx, transaction_number, "canceled")
+	if err != nil {
+		log.Printf("err SetStatusTransaction reject: %s", err.Error())
+		log.Printf("err SetStatusTransaction reject: %s", err.Error())
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		log.Printf("err SetStatusTransaction reject commit 1: %s", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (a *WarehouseService) SetApprove(ctx context.Context, transaction_number string) error {
+	// need RBAC
+	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	TransactionInfo, err := tx.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		return err
+	}
+
+	CurrStatus := TransactionInfo.Status
+	if CurrStatus != "submitted" {
 		msg := fmt.Sprintf("status transaksi saat ini bukan submitted tapi %s", CurrStatus)
 		return errors.New(msg)
 	}
