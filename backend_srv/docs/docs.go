@@ -161,7 +161,7 @@ const docTemplate = `{
         },
         "/api/v1/warehouse/set-status/:transaction_number/:status": {
             "put": {
-                "description": "Authorized User can update transaction process (\"submitted\", \"rejected\", \"canceled\", \"approved\")",
+                "description": "Authorized User can update transaction process (\"submit\", \"reject\", \"cancel\", \"approve\")",
                 "consumes": [
                     "application/json"
                 ],

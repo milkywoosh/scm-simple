@@ -233,7 +233,17 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 		return
 
 	} else if SetStatus == "approve" {
-		internals.WriteErrorResponse(w, http.StatusForbidden, "Proses ini belum dapat dilakukan")
+		err := s.service.WarehouseService.SetApprove(ctx, TransactionNumber)
+		if err != nil {
+			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			return
+		}
+
+		RespData := make(map[string]any)
+		RespData["message"] = "update status berhasil"
+		RespData["transaction_number"] = TransactionNumber
+
+		internals.WriteResponse(w, http.StatusAccepted, RespData)
 		return
 	} else {
 		internals.WriteErrorResponse(w, http.StatusBadRequest, "Proses ini tidak dapat dilakukan. Request tersedia hanya ada (submit, cancel, reject, approve)")

@@ -139,8 +139,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: Authorized User can update transaction process ("submitted", "rejected",
-        "canceled", "approved")
+      description: Authorized User can update transaction process ("submit", "reject",
+        "cancel", "approve")
       parameters:
       - description: transaction number identifier
         in: path
