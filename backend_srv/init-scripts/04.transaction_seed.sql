@@ -142,3 +142,12 @@ INSERT INTO transaction_item_transfer_details (
     'ITM000000000005',
     '2026-01-25'
 );
+
+
+
+-- table transaction_transfer_tracker => untuk tracking proses antara send dan receive
+-- id serial primary key
+-- outbound_transaction string (fk from transaction_item_transfers)
+-- status_outbound string (enum type [ondelivery, arrived])
+-- inbound_number string (fk from transaction_item_transfers)
+-- status_inbound string (enum type [di])
