@@ -55,7 +55,6 @@ func (a *WarehouseService) CreateDraftOutboundTx(ctx context.Context, location_o
 			return n, err
 		}
 	}
-
 	err = tx.Commit(ctx)
 	log.Printf("errr CreateDraftOutboundTx Commit %v", err)
 
@@ -67,6 +66,7 @@ func (a *WarehouseService) CreateDraftOutboundTx(ctx context.Context, location_o
 	n.TransactionType = new_transaction.TransactionType
 	n.Status = new_transaction.Status
 	return n, nil
+
 }
 
 func (a *WarehouseService) AllocateItem(ctx context.Context, transaction_number, identifier string) error {
@@ -331,6 +331,31 @@ func (a *WarehouseService) ListItemsSent(ctx context.Context, transaction_number
 
 	return n, err
 }
+func (a *WarehouseService) ListItemsReceived(ctx context.Context, transaction_number string) (domain.WarehouseInboundInfo, error) {
+	poolQuery, err := a.q.WarehouseQueries(ctx)
+	if err != nil {
+		log.Printf("err query ListItemsReceived: %s", err.Error())
+		return domain.WarehouseInboundInfo{}, err
+	}
+
+	transactionInfo, err := poolQuery.GetTransactionInfo(ctx, transaction_number)
+	if err != nil {
+		log.Printf("err query ListItemsReceived 0: %s", err.Error())
+		return domain.WarehouseInboundInfo{}, err
+	}
+
+	listData, err := poolQuery.GetItemsOnTransaction(ctx, transaction_number)
+	if err != nil {
+		log.Printf("err query ListItemsReceived 1: %s", err.Error())
+		return domain.WarehouseInboundInfo{}, err
+	}
+
+	n := domain.WarehouseInboundInfo{}
+	n.TransactionInfo = transactionInfo
+	n.ListItems = listData
+
+	return n, err
+}
 
 // todo : create notification to warehouse inbound, isi: info outbound" number yg akan masuk
 // warehouse receive
@@ -401,4 +426,41 @@ func (a *WarehouseService) InfoTransferDuration(ctx context.Context, outbound_nu
 	n.Duration = durationInfo.Duration
 
 	return n.ReadAsString(), err
+}
+
+func (a *WarehouseService) AllocateInboundItem(ctx context.Context, transaction_number, identifier string) error {
+	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
+
+	if err != nil {
+		log.Printf("*WarehouseService AllocateItem 1: %v", err)
+		return err
+	}
+
+	defer tx.Rollback(ctx)
+
+	TransInfo, err := tx.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		log.Printf("*WarehouseService CheckTransaction 1: %v", err)
+		return err
+	}
+
+	curr_status := TransInfo.Status
+	if curr_status != "draft" {
+		msg := fmt.Sprintf("error status saat ini bukan draft! saat ini %v", curr_status)
+		return errors.New(msg)
+	}
+
+	err = tx.ReceiveInboundItem(ctx, transaction_number, identifier)
+	if err != nil {
+		log.Printf("*WarehouseService AllocateItem 1: %v", err)
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		log.Printf("errr AllocateItem Commit %v", err)
+		return err
+	}
+
+	return nil
 }

@@ -61,6 +61,8 @@ type LocationRepository interface {
 	EditOutboundTracker(ctx context.Context, transaction_number string) error // set pending (if delivery_at and arrived_at null then pending)
 
 	InputInboundTracker(ctx context.Context, transaction_number, outbound_number string) error
+	ReceiveInboundItem(ctx context.Context, transaction_number, identifier string) error
+
 	CalculateDurationTransfer(ctx context.Context, outbound_number, inbound_number string) (TransferDuration, error)
 }
 

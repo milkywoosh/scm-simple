@@ -215,6 +215,79 @@ func (d *DBLocationRepository) AllocateItem(ctx context.Context, transaction_num
 	return nil
 
 }
+func (d *DBLocationRepository) ReceiveInboundItem(ctx context.Context, transaction_number, identifier string) error {
+
+	query1 := `
+		insert into item_histories (
+			item_id,
+			transaction_number,
+			previous_status,
+			status_history,
+			created_at
+		) values (
+			(select id from items i where i.serial_number = $1), 
+			$2, 
+			(select curr_status from items i where i.serial_number = $1), 
+			$3 , 
+			CURRENT_TIMESTAMP
+		)
+	`
+	_, err := d.Conn.Exec(ctx, query1, identifier, transaction_number, "AVAILABLE")
+	if err != nil {
+		log.Printf("err insert into item_histories: %v", err)
+		return err
+	}
+
+	query2 := `
+		update items
+			set curr_status = 'AVAILABLE',
+				curr_transaction = $2,
+				curr_location_code = (
+					select y.destination from 
+						transaction_item_transfers y
+					where y.transaction_number = $2
+				)
+		where serial_number = $1
+			and curr_transaction = (
+				select outbound_transaction
+					from transaction_transfer_tracker x 
+				where x.inbound_transaction = $2
+			)
+		returning id
+	`
+	row := d.Conn.QueryRow(ctx, query2, identifier, transaction_number)
+
+	var item_id int
+	err = row.Scan(&item_id)
+	if err != nil {
+		log.Printf("err update ReceiveInboundItem : %v", err)
+		return err
+	}
+
+	TransInfo, err := d.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		log.Printf("err insert into ReceiveInboundItem 2, %v", err)
+		return err
+	}
+
+	query3 := `
+		INSERT INTO transaction_item_transfer_details (
+			id_trans_item_transfer,
+			identifier_item,
+			added_at
+		) VALUES (
+			$1, $2, NOW()
+		)
+	`
+	_, err = d.Conn.Exec(ctx, query3, TransInfo.Id, identifier)
+	if err != nil {
+		log.Printf("err insert into item_histories: %v", err)
+		return err
+	}
+
+	return nil
+
+}
 
 func (d *DBLocationRepository) DisAllocateItem(ctx context.Context, transaction_number, identifier string) error {
 

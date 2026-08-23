@@ -28,7 +28,7 @@ type CreateDraftWarehouseInboundParams struct {
 // @Param		 request        body      CreateDraftWarehouseInboundParams  true  "draft transaction transfer payload"
 // @Success      200  {object}  map[string]any
 // @Failure      400  {string}  ErrorResponse
-// @Router       /api/v1/warehouse/create-draft-inbound [post]
+// @Router       /api/v1/warehouse/inbound/create-draft [post]
 func (s *Server) CreateDraftWarehouseInbound(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
 	ctx := req.Context()
 
@@ -88,4 +88,74 @@ func (s *Server) DurationTransfer(w http.ResponseWriter, req *http.Request, path
 	resp["info_durasi"] = DurationInfo
 
 	internals.WriteResponse(w, http.StatusAccepted, resp)
+}
+
+type InputItemWarehouseInboundParams struct {
+	Identifier string `json:"identifier"`
+}
+
+// InputItemWarehouseInbound godoc
+// @Summary      Input each item one by one(serial_number) in Inbound Transaction
+// @Description  User scan identifier for each item that will be delivered as AVAILABLE
+// @Tags         warehouse_service item_transfer
+// @Accept       json
+// @Produce      json
+// @Param		 request        body      InputItemWarehouseInboundParams  true  "receiving item transfer payload"
+// @Param		 request        path      string  true  "transaction number inbound identifier"
+// @Success      200  {object}  map[string]any
+// @Failure      400  {string}  ErrorResponse
+// @Router       /api/v1/warehouse/inbound/input-item/:transaction_number [post]
+func (s *Server) InputItemWarehouseInbound(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
+
+	ctx := req.Context()
+
+	var ReqBody InputItemWarehouseInboundParams
+	TransactionNumber := pathParam.ByName("transaction_number")
+
+	DataResp := make(map[string]any)
+
+	// read input from Body
+	errDecode := json.NewDecoder(req.Body).Decode(&ReqBody)
+	if errDecode != nil {
+		DataResp["message"] = "error parsing request body"
+		internals.WriteResponse(w, http.StatusBadRequest, DataResp)
+		return
+	}
+
+	err := s.service.WarehouseService.AllocateInboundItem(ctx, TransactionNumber, ReqBody.Identifier)
+	if err != nil {
+		internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+		return
+	}
+
+	DataResp["message"] = "return okay"
+	internals.WriteResponse(w, http.StatusAccepted, DataResp)
+	return
+}
+
+// ListItemsReceived godoc
+// @Summary      get data transaction number and list of inbound items from warehouse
+// @Description  Authorized User can receive this info, limit by authorization token.
+// @Tags         warehouse_service item_transfer
+// @Accept       json
+// @Produce      json
+// @Param		 request        path      string  true  "transaction number identifier"
+// @Success      200  {object}  map[string]any
+// @Failure      400  {string}  ErrorResponse
+// @Router       /api/v1/warehouse/inbound/list-items/:transaction_number [get]
+func (s *Server) ListItemsReceived(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
+
+	ctx := req.Context()
+	TransactionNumber := pathParam.ByName("transaction_number")
+
+	listItems, err := s.service.WarehouseService.ListItemsReceived(ctx, TransactionNumber)
+	if err != nil {
+		internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+		return
+	}
+
+	RespData := make(map[string]any)
+	RespData["data"] = listItems
+	RespData["message"] = "list of warehouse inbound"
+	internals.WriteResponse(w, http.StatusAccepted, RespData)
 }

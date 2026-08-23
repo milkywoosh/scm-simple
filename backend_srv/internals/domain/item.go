@@ -28,6 +28,11 @@ type WarehouseOutboundInfo struct {
 	ListItems       []EachItemTransaction `json:"list_items"`
 }
 
+type WarehouseInboundInfo struct {
+	TransactionInfo TransactionInfo       `json:"transaction_info"`
+	ListItems       []EachItemTransaction `json:"list_items"`
+}
+
 type EachItemTransaction struct {
 	Id           int32              `json:"id"` // int32 adjust serial pgdata type as int4
 	IdTransfer   int32              `json:"id_trans_item_transfer"`

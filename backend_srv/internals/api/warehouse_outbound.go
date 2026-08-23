@@ -59,7 +59,7 @@ type CreateDraftWarehouseTransferParams struct {
 // @Param		 request        body      CreateDraftWarehouseTransferParams  true  "draft transaction transfer payload"
 // @Success      200  {object}  map[string]any
 // @Failure      400  {string}  ErrorResponse
-// @Router       /api/v1/warehouse/create-draft-outbound [post]
+// @Router       /api/v1/warehouse/outbound/create-draft [post]
 func (s *Server) CreateDraftWarehouseTransfer(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
 
 	ctx := req.Context()
@@ -102,7 +102,7 @@ type InputItemWarehouseTransferParams struct {
 // @Param		 request        path      string  true  "transaction number identifier"
 // @Success      200  {object}  map[string]any
 // @Failure      400  {string}  ErrorResponse
-// @Router       /api/v1/warehouse/input-item/:transaction_number [post]
+// @Router       /api/v1/warehouse/outbound/input-item/:transaction_number [post]
 func (s *Server) InputItemWarehouseTransfer(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
 
 	ctx := req.Context()
@@ -145,7 +145,7 @@ type DisallocateItemWarehouseTransferParams struct {
 // @Param		 request        path      string  true  "transaction number identifier"
 // @Success      200  {object}  map[string]any
 // @Failure      400  {string}  ErrorResponse
-// @Router       /api/v1/warehouse/disallocate-item/:transaction_number [post]
+// @Router       /api/v1/warehouse/outbound/disallocate-item/:transaction_number [post]
 func (s *Server) DisallocateItemWarehouseTransfer(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
 
 	ctx := req.Context()
@@ -184,7 +184,7 @@ func (s *Server) DisallocateItemWarehouseTransfer(w http.ResponseWriter, req *ht
 // @Param		 request        path      string  true  "status to update"
 // @Success      200  {object}  map[string]any
 // @Failure      400  {string}  ErrorResponse
-// @Router       /api/v1/warehouse/set-status/:transaction_number/:status [put]
+// @Router       /api/v1/warehouse/outbound/set-status/:transaction_number/:status [put]
 func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
 
 	ctx := req.Context()
@@ -262,7 +262,7 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 // @Param		 request        path      string  true  "transaction number identifier"
 // @Success      200  {object}  map[string]any
 // @Failure      400  {string}  ErrorResponse
-// @Router       /api/v1/warehouse/list-items/:transaction_number [get]
+// @Router       /api/v1/warehouse/outbound/list-items/:transaction_number [get]
 func (s *Server) ListItemsSent(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
 
 	ctx := req.Context()
