@@ -63,7 +63,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/warehouse/create-draft-outbound": {
+        "/api/v1/warehouse/outbound/create-draft": {
             "post": {
                 "description": "Create New Draft Transaction outbound",
                 "consumes": [
@@ -104,7 +104,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/warehouse/disallocate-item/:transaction_number": {
+        "/api/v1/warehouse/outbound/disallocate-item/:transaction_number": {
             "post": {
                 "description": "User scan identifier for each item that will be takenout as set to be",
                 "consumes": [
@@ -152,7 +152,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/warehouse/input-item/:transaction_number": {
+        "/api/v1/warehouse/outbound/input-item/:transaction_number": {
             "post": {
                 "description": "User scan identifier for each item that will be delivered as ALLOCATED",
                 "consumes": [
@@ -200,7 +200,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/warehouse/list-items/:transaction_number": {
+        "/api/v1/warehouse/outbound/list-items/:transaction_number": {
             "get": {
                 "description": "Authorized User can receive this info, limit by authorization token.",
                 "consumes": [
@@ -239,7 +239,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/warehouse/set-status/:transaction_number/:status": {
+        "/api/v1/warehouse/outbound/set-status/:transaction_number/:status": {
             "put": {
                 "description": "Authorized User can update transaction process (\"submit\", \"reject\", \"cancel\", \"approve\")",
                 "consumes": [

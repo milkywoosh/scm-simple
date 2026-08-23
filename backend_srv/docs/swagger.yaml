@@ -79,7 +79,7 @@ paths:
       summary: Create draft for warehouse inbound
       tags:
       - warehouse_service item_transfer
-  /api/v1/warehouse/create-draft-outbound:
+  /api/v1/warehouse/outbound/create-draft:
     post:
       consumes:
       - application/json
@@ -106,7 +106,7 @@ paths:
       summary: Create New Draft Transaction for outbound
       tags:
       - warehouse_service item_transfer
-  /api/v1/warehouse/disallocate-item/:transaction_number:
+  /api/v1/warehouse/outbound/disallocate-item/:transaction_number:
     post:
       consumes:
       - application/json
@@ -139,7 +139,7 @@ paths:
       summary: Takeout each item one by one(serial_number) in Transaction
       tags:
       - warehouse_service item_transfer
-  /api/v1/warehouse/input-item/:transaction_number:
+  /api/v1/warehouse/outbound/input-item/:transaction_number:
     post:
       consumes:
       - application/json
@@ -171,7 +171,7 @@ paths:
       summary: Input each item one by one(serial_number) in Transaction
       tags:
       - warehouse_service item_transfer
-  /api/v1/warehouse/list-items/:transaction_number:
+  /api/v1/warehouse/outbound/list-items/:transaction_number:
     get:
       consumes:
       - application/json
@@ -197,7 +197,7 @@ paths:
       summary: get data transaction number and list of outbound items from warehouse
       tags:
       - warehouse_service item_transfer
-  /api/v1/warehouse/set-status/:transaction_number/:status:
+  /api/v1/warehouse/outbound/set-status/:transaction_number/:status:
     put:
       consumes:
       - application/json
