@@ -50,6 +50,7 @@ type CreateDraftWarehouseTransferParams struct {
 	LocationDestination string `json:"location_destination"`
 }
 
+
 // CreateDraftWarehouseTransfer godoc
 // @Summary      Create New Draft Transaction
 // @Description  Create New Draft Transaction Warehouse to Warehouse
@@ -59,7 +60,7 @@ type CreateDraftWarehouseTransferParams struct {
 // @Param		 request        body      CreateDraftWarehouseTransferParams  true  "draft transaction transfer payload"
 // @Success      200  {object}  map[string]any
 // @Failure      400  {string}  ErrorResponse
-// @Router       /api/v1/warehouse/create-draft-transfer [post]
+// @Router       /api/v1/warehouse/create-draft-outbound [post]
 func (s *Server) CreateDraftWarehouseTransfer(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
 
 	ctx := req.Context()
@@ -75,7 +76,7 @@ func (s *Server) CreateDraftWarehouseTransfer(w http.ResponseWriter, req *http.R
 		return
 	}
 
-	NewDraft, err := s.service.WarehouseService.CreateDraftTx(ctx, ReqBody.LocationOrigin, ReqBody.LocationDestination)
+	NewDraft, err := s.service.WarehouseService.CreateDraftOutboundTx(ctx, ReqBody.LocationOrigin, ReqBody.LocationDestination)
 	if err != nil {
 		DataResp["message"] = err.Error()
 		internals.WriteResponse(w, http.StatusConflict, DataResp)
