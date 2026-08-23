@@ -145,9 +145,4 @@ INSERT INTO transaction_item_transfer_details (
 
 
 
--- table transaction_transfer_tracker => untuk tracking proses antara send dan receive
--- id serial primary key
--- outbound_transaction string (fk from transaction_item_transfers)
--- status_outbound string (enum type [ondelivery, arrived])
--- inbound_number string (fk from transaction_item_transfers)
--- status_inbound string (enum type [di])
+
