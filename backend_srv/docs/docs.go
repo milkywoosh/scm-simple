@@ -22,9 +22,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/warehouse/create-draft-outbound": {
+        "/api/v1/warehouse/create-draft-inbound": {
             "post": {
-                "description": "Create New Draft Transaction Warehouse to Warehouse",
+                "description": "Warehouse inbound receiving all incoming items from warehouse origin",
                 "consumes": [
                     "application/json"
                 ],
@@ -34,7 +34,48 @@ const docTemplate = `{
                 "tags": [
                     "warehouse_service item_transfer"
                 ],
-                "summary": "Create New Draft Transaction",
+                "summary": "Create draft for warehouse inbound",
+                "parameters": [
+                    {
+                        "description": "draft transaction transfer payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateDraftWarehouseInboundParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/warehouse/create-draft-outbound": {
+            "post": {
+                "description": "Create New Draft Transaction outbound",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "warehouse_service item_transfer"
+                ],
+                "summary": "Create New Draft Transaction for outbound",
                 "parameters": [
                     {
                         "description": "draft transaction transfer payload",
@@ -244,6 +285,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/warehouse/transfer-duration/:outbound_number/:inbound_number": {
+            "get": {
+                "description": "Subtract time between arrived_at and delivery_at timestamptz",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "warehouse_service item_transfer"
+                ],
+                "summary": "Check duration transfer between warehouse",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "outbound number transaction",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "inbound number transaction",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/warehouse/:location_code": {
             "get": {
                 "description": "Search location by location code, customer, technician, warehouse",
@@ -353,6 +440,20 @@ const docTemplate = `{
                     }
                 },
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.CreateDraftWarehouseInboundParams": {
+            "type": "object",
+            "properties": {
+                "location_destination": {
+                    "type": "string"
+                },
+                "location_origin": {
+                    "type": "string"
+                },
+                "outbound_number": {
                     "type": "string"
                 }
             }
