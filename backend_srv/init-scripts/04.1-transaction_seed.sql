@@ -8,10 +8,10 @@ CREATE TABLE transaction_item_transfers (
     transaction_type type_of_trans,
     origin VARCHAR(60),
     destination VARCHAR(60),
-    created_at DATE NOT NULL DEFAULT CURRENT_DATE,
-    submitted_at DATE,
-    approved_at DATE,
-    canceled_at DATE
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    submitted_at TIMESTAMPTZ,
+    approved_at TIMESTAMPTZ,
+    canceled_at TIMESTAMPTZ
 );
 
 CREATE INDEX trans_number_idx ON transaction_item_transfers (transaction_number);
@@ -20,7 +20,7 @@ CREATE TABLE transaction_item_transfer_details (
     id  serial primary key ,
     id_trans_item_transfer INT,
     identifier_item VARCHAR(80),
-    added_at DATE NOT NULL DEFAULT CURRENT_DATE
+    added_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 ALTER TABLE transaction_item_transfer_details
     ADD CONSTRAINT fk_transaction_item_transfer

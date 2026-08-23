@@ -5,8 +5,8 @@ CREATE TABLE warehouses (
     location_code VARCHAR(60) NOT NULL UNIQUE,
     "description" VARCHAR(100),
     parent_location_code VARCHAR(60),
-    created_at DATE NOT NULL DEFAULT CURRENT_DATE,
-    updated_at DATE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ,
     location_point geography(Point, 4326)
 );
 -- enforce SRID 4326

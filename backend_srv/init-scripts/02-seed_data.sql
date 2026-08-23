@@ -10,8 +10,8 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
     "password" VARCHAR(100) UNIQUE,
-    created_at DATE NOT NULL DEFAULT CURRENT_DATE,
-    updated_at DATE
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ
 );
 -- index username
 CREATE INDEX username_idx ON users (username);
