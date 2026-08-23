@@ -43,7 +43,7 @@ info:
   title: scm-simple API
   version: "1.0"
 paths:
-  /api/v1/warehouse/create-draft-transfer:
+  /api/v1/warehouse/create-draft-outbound:
     post:
       consumes:
       - application/json

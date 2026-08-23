@@ -22,7 +22,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/warehouse/create-draft-transfer": {
+        "/api/v1/warehouse/create-draft-outbound": {
             "post": {
                 "description": "Create New Draft Transaction Warehouse to Warehouse",
                 "consumes": [

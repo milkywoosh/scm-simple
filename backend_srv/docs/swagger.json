@@ -16,7 +16,7 @@
     "host": "103.235.75.94:8000",
     "basePath": "/api/v1",
     "paths": {
-        "/api/v1/warehouse/create-draft-transfer": {
+        "/api/v1/warehouse/create-draft-outbound": {
             "post": {
                 "description": "Create New Draft Transaction Warehouse to Warehouse",
                 "consumes": [
