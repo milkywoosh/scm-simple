@@ -297,3 +297,30 @@ func (a *WarehouseService) SetApprove(ctx context.Context, transaction_number st
 	}
 	return nil
 }
+
+func (a *WarehouseService) ListItemsSent(ctx context.Context, transaction_number string) (domain.WarehouseOutboundInfo, error) {
+	poolQuery, err := a.q.WarehouseQueries(ctx)
+	if err != nil {
+		log.Printf("err query ListItemsSent: %s", err.Error())
+		return domain.WarehouseOutboundInfo{}, err
+	}
+
+	transactionInfo, err := poolQuery.GetTransactionInfo(ctx, transaction_number)
+	if err != nil {
+		log.Printf("err query ListItemsSent 0: %s", err.Error())
+		return domain.WarehouseOutboundInfo{}, err
+	}
+
+	listData, err := poolQuery.GetItemsOnTransaction(ctx, transaction_number)
+	if err != nil {
+		log.Printf("err query ListItemsSent 1: %s", err.Error())
+		return domain.WarehouseOutboundInfo{}, err
+	}
+
+	n := domain.WarehouseOutboundInfo{}
+	n.TransactionInfo = transactionInfo
+	n.ListItems = listData
+
+	return n, err
+
+}

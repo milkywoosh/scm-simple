@@ -252,3 +252,30 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 	}
 
 }
+
+// ListItemsSent godoc
+// @Summary      get data transaction number and list of outbound items from warehouse
+// @Description  Authorized User can receive this info, limit by authorization token.
+// @Tags         warehouse_service item_transfer
+// @Accept       json
+// @Produce      json
+// @Param		 request        path      string  true  "transaction number identifier"
+// @Success      200  {object}  map[string]any
+// @Failure      400  {string}  ErrorResponse
+// @Router       /api/v1/warehouse/list-items/:transaction_number [get]
+func (s *Server) ListItemsSent(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
+
+	ctx := req.Context()
+	TransactionNumber := pathParam.ByName("transaction_number")
+
+	listItems, err := s.service.WarehouseService.ListItemsSent(ctx, TransactionNumber)
+	if err != nil {
+		internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+		return
+	}
+
+	RespData := make(map[string]any)
+	RespData["data"] = listItems
+	RespData["message"] = "list of warehouse outbound"
+	internals.WriteResponse(w, http.StatusAccepted, RespData)
+}

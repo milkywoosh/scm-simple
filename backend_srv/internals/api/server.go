@@ -105,11 +105,12 @@ func (s *Server) callInit() {
 }
 
 func (s *Server) warehouseRoutes() {
-	s.route.GET("/api/v1/warehouse/:location_code", s.GetLocationByLocationCode)
+	s.route.GET("/api/v1/warehouse/info/:location_code", s.GetLocationByLocationCode)
 	s.route.POST("/api/v1/warehouse/create-draft-transfer", s.CreateDraftWarehouseTransfer)
 	s.route.POST("/api/v1/warehouse/input-item/:transaction_number", s.InputItemWarehouseTransfer)
 	s.route.POST("/api/v1/warehouse/disallocate-item/:transaction_number", s.DisallocateItemWarehouseTransfer)
 	s.route.PUT("/api/v1/warehouse/set-status/:transaction_number/:status", s.SetStatusTransaction)
+	s.route.GET("/api/v1/warehouse/list-items/:transaction_number", s.ListItemsSent)
 }
 
 func (s *Server) userRoutes() {

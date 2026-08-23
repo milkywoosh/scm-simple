@@ -247,27 +247,28 @@ func (d *DBLocationRepository) DisAllocateItem(ctx context.Context, transaction_
 	return nil
 }
 
-func (d *DBLocationRepository) GetItemsOnTransaction(ctx context.Context, transaction_number string) ([]domain.ListItemsTransaction, error) {
+func (d *DBLocationRepository) GetItemsOnTransaction(ctx context.Context, transaction_number string) ([]domain.EachItemTransaction, error) {
 
 	query := `
 			select * from transaction_item_transfer_details t 
 			where t.id_trans_item_transfer = (
 				select id 
-				from transaction_item_transfers t1 
-				where t1.transaction_number  = $1
+					from transaction_item_transfers t1 
+				where 
+					t1.transaction_number  = $1
 			)
 	`
 	rows, err := d.Conn.Query(ctx, query, transaction_number)
 	if err != nil {
 		log.Printf("err query GetItemsOnTransaction 1: %s", err.Error())
-		return []domain.ListItemsTransaction{}, err
+		return []domain.EachItemTransaction{}, err
 	}
 
-	datas := []domain.ListItemsTransaction{}
+	datas := []domain.EachItemTransaction{}
 
 	for rows.Next() {
 
-		var data domain.ListItemsTransaction
+		var data domain.EachItemTransaction
 		if err := rows.Scan(
 			&data.Id,
 			&data.IdTransfer,
@@ -275,7 +276,7 @@ func (d *DBLocationRepository) GetItemsOnTransaction(ctx context.Context, transa
 			&data.AddedAt,
 		); err != nil {
 			log.Printf("err loop list items: %s", err.Error())
-			return []domain.ListItemsTransaction{}, err
+			return []domain.EachItemTransaction{}, err
 		}
 
 		datas = append(datas, data)
@@ -328,4 +329,45 @@ func (d *DBLocationRepository) CheckTransaction(ctx context.Context, transaction
 
 	return data, nil
 
+}
+
+func (d *DBLocationRepository) GetTransactionInfo(ctx context.Context, transaction_number string) (domain.TransactionInfo, error) {
+	query := `
+		select
+			id,
+			transaction_number,
+			status,
+			transaction_type,
+			origin,
+			destination,
+			created_at,
+			submitted_at,
+			approved_at
+		from transaction_item_transfers t
+			where t.transaction_number = $1
+	`
+
+	var data domain.TransactionInfo
+	row := d.Conn.QueryRow(ctx, query, transaction_number)
+
+	if err := row.Scan(
+		&data.Id,
+		&data.TransactionNumber,
+		&data.Status,
+		&data.TransactionType,
+		&data.Origin,
+		&data.Destination,
+		&data.CreatedAt,
+		&data.SubmittedAt,
+		&data.ApprovedAt,
+	); err != nil {
+		log.Printf("cek CheckTransaction repo 1: %v", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			msg := fmt.Sprintf("transaction_number %s tidak ditemukan", transaction_number)
+			return data, errors.New(msg)
+		}
+		return data, err
+	}
+
+	return data, nil
 }
