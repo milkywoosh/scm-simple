@@ -32,16 +32,16 @@ type LocationRow struct {
 }
 
 type TransactionInfo struct {
-	Id                string
-	TransactionNumber string
-	Status            string
-	Origin            string
-	Destination       string
-	TransactionType   string
-	CreatedAt         internals.NullTime
-	SubmittedAt       internals.NullTime
-	ApprovedAt        internals.NullTime
-	CanceledAt        internals.NullTime
+	Id                string             `json:"id"`
+	TransactionNumber string             `json:"transaction_number"`
+	Status            string             `json:"status"`
+	Origin            string             `json:"origin"`
+	Destination       string             `json:"Destination"`
+	TransactionType   string             `json:"transaction_type"`
+	CreatedAt         internals.NullTime `json:"created_at"`
+	SubmittedAt       internals.NullTime `json:"submitted_at"`
+	ApprovedAt        internals.NullTime `json:"approved_at"`
+	CanceledAt        internals.NullTime `json:"canceled_at"`
 }
 
 type LocationRepository interface {
@@ -56,6 +56,12 @@ type LocationRepository interface {
 	ReceiveItem(ctx context.Context, transaction_number, destination, origin string, item string) error
 	GetTransactionInfo(ctx context.Context, transaction_number string) (TransactionInfo, error)
 	GetItemsOnTransaction(ctx context.Context, transaction_number string) ([]EachItemTransaction, error)
+
+	InputOutboundTracker(ctx context.Context, transaction_number string) error
+	EditOutboundTracker(ctx context.Context, transaction_number string) error // set pending (if delivery_at and arrived_at null then pending)
+
+	InputInboundTracker(ctx context.Context, transaction_number, outbound_number string) error
+	CalculateDurationTransfer(ctx context.Context, outbound_number, inbound_number string) (TransferDuration, error)
 }
 
 type StockTransfer interface {

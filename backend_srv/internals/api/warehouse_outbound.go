@@ -50,10 +50,9 @@ type CreateDraftWarehouseTransferParams struct {
 	LocationDestination string `json:"location_destination"`
 }
 
-
 // CreateDraftWarehouseTransfer godoc
-// @Summary      Create New Draft Transaction
-// @Description  Create New Draft Transaction Warehouse to Warehouse
+// @Summary      Create New Draft Transaction for outbound
+// @Description  Create New Draft Transaction outbound
 // @Tags         warehouse_service item_transfer
 // @Accept       json
 // @Produce      json

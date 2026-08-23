@@ -99,11 +99,36 @@ func (d *DBLocationRepository) NewDraftTransaction(ctx context.Context, transact
 
 func (d *DBLocationRepository) SetStatusTransaction(ctx context.Context, transaction_number, status string) error {
 
-	query :=
-		`UPDATE transaction_item_transfers
-			set status = $1
-		WHERE transaction_number = $2
-		`
+	var query string = ""
+	if status == "submitted" {
+
+		query =
+			`UPDATE transaction_item_transfers
+				set status = $1,
+					submitted_at = now()
+			WHERE transaction_number = $2
+			`
+	}
+	if status == "canceled" {
+		query =
+			`UPDATE transaction_item_transfers
+				set status = $1,
+					canceled_at = now()
+					WHERE transaction_number = $2
+					`
+
+	}
+	if status == "approved" {
+		query =
+			`UPDATE transaction_item_transfers
+					set status = $1,
+					approved_at = now()
+			WHERE transaction_number = $2
+			`
+
+	} else {
+
+	}
 
 	_, err := d.Conn.Exec(
 		ctx,
@@ -307,7 +332,6 @@ func (d *DBLocationRepository) CheckTransaction(ctx context.Context, transaction
 	var data domain.TransactionInfo
 
 	row := d.Conn.QueryRow(ctx, query, transaction_number)
-
 	if err := row.Scan(
 		&data.Id,
 		&data.TransactionNumber,
@@ -370,4 +394,94 @@ func (d *DBLocationRepository) GetTransactionInfo(ctx context.Context, transacti
 	}
 
 	return data, nil
+}
+
+func (d *DBLocationRepository) InputOutboundTracker(ctx context.Context, transaction_number string) error {
+	query := `
+		INSERT INTO transaction_transfer_tracker (
+			outbound_transaction,
+			delivery_at
+		) VALUES (
+		 	$1, now()
+		) RETURNING *;
+		
+	`
+	var data domain.WarehouseOutboundTracker
+	row := d.Conn.QueryRow(ctx, query, transaction_number)
+	if err := row.Scan(
+		&data.Id,
+		&data.OutboundTransaction,
+		&data.InboundTransaction,
+		&data.DeliveryAt,
+		&data.ArrivedAt,
+		&data.Files,
+	); err != nil {
+		log.Printf("err SetOutboundTracker 1: %s", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (d *DBLocationRepository) InputInboundTracker(ctx context.Context, transaction_number, outbound_number string) error {
+	query := `
+		UPDATE transaction_transfer_tracker
+			SET inbound_transaction = $1,
+				arrived_at = NOW()
+		WHERE arrived_at is NULL 
+			AND delivery_at is NOT NULL
+			AND outbound_transaction = $2  	
+		RETURNING *;
+		
+	`
+	var data domain.WarehouseOutboundTracker
+	row := d.Conn.QueryRow(ctx, query, transaction_number, outbound_number)
+	if err := row.Scan(
+		&data.Id,
+		&data.OutboundTransaction,
+		&data.InboundTransaction,
+		&data.DeliveryAt,
+		&data.ArrivedAt,
+		&data.Files,
+	); err != nil {
+		log.Printf("err InputInboundTracker 1: %s", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (d *DBLocationRepository) EditOutboundTracker(ctx context.Context, transaction_number string) error { // set pending (if delivery_at and arrived_at null then pending)
+
+	return nil
+}
+
+func (d *DBLocationRepository) CalculateDurationTransfer(ctx context.Context, outbound_number, inbound_number string) (domain.TransferDuration, error) { // set pending (if delivery_at and arrived_at null then pending)
+	n := domain.TransferDuration{}
+
+	if outbound_number == "" || inbound_number == "" {
+		return n, fmt.Errorf("parameter harus diisi semua")
+	}
+	query := `
+		select 
+			(t.arrived_at - t.delivery_at ) as duration_transfer 
+		from 
+			transaction_transfer_tracker t 
+		where t.outbound_transaction = $1
+			and t.inbound_transaction = $2
+	`
+	row := d.Conn.QueryRow(ctx, query, outbound_number, inbound_number)
+	var data domain.TransferDuration
+
+	if err := row.Scan(
+		&data.Duration,
+	); err != nil {
+		log.Printf("cek CalculateDurationTransfer 1: %v", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			msg := fmt.Sprintf("identifier tidak ditemukan")
+			return data, errors.New(msg)
+		}
+		return data, err
+	}
+
+	return data, nil
+
 }

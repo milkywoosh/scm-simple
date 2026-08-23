@@ -24,7 +24,7 @@ type ItemRepository interface {
 }
 
 type WarehouseOutboundInfo struct {
-	TransactionInfo `json:"transaction_info"`
+	TransactionInfo TransactionInfo       `json:"transaction_info"`
 	ListItems       []EachItemTransaction `json:"list_items"`
 }
 

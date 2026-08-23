@@ -25,7 +25,7 @@ type Conn struct {
 
 func NewConn(ctx context.Context, connString string) (*Conn, error) {
 
-	pgxPoolInit, errPgxPool := pgxpool.New(context.Background(), connString)
+	pgxPoolInit, errPgxPool := pgxpool.New(ctx, connString)
 	if errPgxPool != nil {
 		// log.Fatalf("err pgx pool init: %v", errPgxPool)
 		return nil, errPgxPool
@@ -73,19 +73,17 @@ func (or *PgDBInstance) beginTx(ctx context.Context) (*pgTransaction, error) {
 func (or *PgDBInstance) BeginAuth(ctx context.Context) (domain.Authentication, error) {
 
 	return or.beginTx(ctx)
-	
+
 }
 
 func (or *PgDBInstance) BeginWarehouseToWarehouse(ctx context.Context) (domain.StockTransfer, error) {
 	return or.beginTx(ctx)
 }
 
-
 func (or *PgDBInstance) BeginSetLocation(ctx context.Context) (domain.LocationRepository, error) {
 	pgTx, err := or.beginTx(ctx)
 	return pgTx.LocationRepo(), err
 }
-
 
 /*
 
