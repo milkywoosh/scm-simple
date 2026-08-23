@@ -20,6 +20,10 @@ func (a *WarehouseService) WarehouseInfo(ctx context.Context, location_code stri
 	return locationRepo.GetLocation(ctx, location_code, domain.WarehouseType)
 }
 
+func (a *WarehouseService) SetOutBoundTracker(ctx context.Context, transaction_number string) error {
+	return nil
+}
+
 type WarehouseTransferHeader struct {
 	TransactionNumber string `json:"transaction_number"`
 	Status            string `json:"status"`
@@ -29,9 +33,9 @@ type WarehouseTransferHeader struct {
 type WarehouseReceiveDraft struct {
 }
 
-func (a *WarehouseService) CreateDraftTx(ctx context.Context, location_origin, location_destination string) (WarehouseTransferHeader, error) {
+func (a *WarehouseService) CreateDraftOutboundTx(ctx context.Context, location_origin, location_destination string) (WarehouseTransferHeader, error) {
 	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
-	log.Printf("errr CreateDraftTx %v", err)
+	log.Printf("errr CreateDraftOutboundTx %v", err)
 	n := WarehouseTransferHeader{}
 	if err != nil {
 		return n, err
@@ -41,10 +45,10 @@ func (a *WarehouseService) CreateDraftTx(ctx context.Context, location_origin, l
 
 	currdate := time.Now().Format("20060102150405")
 	randString := internals.RandomStringSuffix(5)
-	transaction_number := fmt.Sprintf("WH_TO_WH_%s_%s", currdate, randString)
+	transaction_number := fmt.Sprintf("WH_OUTBOUND_%s_%s", currdate, randString)
 
 	new_transaction, err := tx.NewDraftTransaction(ctx, transaction_number, "warehouse_to_warehouse", location_origin, location_destination)
-	log.Printf("errr CreateDraftTx 1 %v", err)
+	log.Printf("errr CreateDraftOutboundTx 1 %v", err)
 
 	if err != nil {
 		if err != nil {
@@ -53,14 +57,14 @@ func (a *WarehouseService) CreateDraftTx(ctx context.Context, location_origin, l
 	}
 
 	err = tx.Commit(ctx)
-	log.Printf("errr CreateDraftTx Commit %v", err)
+	log.Printf("errr CreateDraftOutboundTx Commit %v", err)
 
 	if err != nil {
 		return n, err
 	}
 
 	n.TransactionNumber = new_transaction.TransactionNumber
-	n.Status = new_transaction.Status
+	n.TransactionType = new_transaction.TransactionType
 	n.Status = new_transaction.Status
 	return n, nil
 }
@@ -136,7 +140,6 @@ func (a *WarehouseService) DisAllocateItem(ctx context.Context, transaction_numb
 		log.Printf("errr DisAllocateItem Commit %v", err)
 		return err
 	}
-
 	return nil
 }
 
@@ -146,7 +149,6 @@ func (a *WarehouseService) SetSubmit(ctx context.Context, transaction_number str
 	if err != nil {
 		return err
 	}
-
 	defer tx.Rollback(ctx)
 
 	TransactionInfo, err := tx.CheckTransaction(ctx, transaction_number)
@@ -290,6 +292,12 @@ func (a *WarehouseService) SetApprove(ctx context.Context, transaction_number st
 		return err
 	}
 
+	err = tx.InputOutboundTracker(ctx, transaction_number)
+	if err != nil {
+		log.Printf("err SetApprove InputOutboundTracker: %s", err.Error())
+		return err
+	}
+
 	err = tx.Commit(ctx)
 	if err != nil {
 		log.Printf("err SetStatusTransaction approve commit 1: %s", err.Error())
@@ -322,5 +330,75 @@ func (a *WarehouseService) ListItemsSent(ctx context.Context, transaction_number
 	n.ListItems = listData
 
 	return n, err
+}
 
+// todo : create notification to warehouse inbound, isi: info outbound" number yg akan masuk
+// warehouse receive
+func (a *WarehouseService) CreateDraftInboundTx(ctx context.Context, location_receiver, location_sender, outbound_number string) (WarehouseTransferHeader, error) {
+	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
+	log.Printf("errr CreateDraftInboundTx %v", err)
+	n := WarehouseTransferHeader{}
+	if err != nil {
+		return n, err
+	}
+	defer tx.Rollback(ctx)
+
+	// check outbound_number
+	outboundNumberInfo, err := tx.CheckTransaction(ctx, outbound_number)
+	if err != nil {
+		log.Printf("errr CreateDraftInboundTx outboundNumberInfo: %v", err)
+		return n, err
+	}
+
+	validation1 := domain.ValidationWarehouseInbound{}
+	err = validation1.CheckOutboundNumber(outboundNumberInfo)
+	if err != nil {
+		return n, err
+	}
+	currdate := time.Now().Format("20060102150405")
+	randString := internals.RandomStringSuffix(5)
+	// as inbound number
+	transaction_number := fmt.Sprintf("WH_INBOUND_%s_%s", currdate, randString)
+
+	new_transaction, err := tx.NewDraftTransaction(ctx, transaction_number, "warehouse_to_warehouse", location_sender, location_receiver)
+	if err != nil {
+		log.Printf("errr CreateDraftInboundTx 1 %v", err)
+		if err != nil {
+			return n, err
+		}
+	}
+
+	err = tx.InputInboundTracker(ctx, transaction_number, outbound_number)
+	if err != nil {
+		return n, err
+	}
+
+	err = tx.Commit(ctx)
+	log.Printf("errr CreateDraftInboundTx Commit %v", err)
+
+	if err != nil {
+		return n, err
+	}
+
+	n.TransactionNumber = new_transaction.TransactionNumber
+	n.TransactionType = new_transaction.TransactionType
+	n.Status = new_transaction.Status
+	return n, nil
+}
+
+func (a *WarehouseService) InfoTransferDuration(ctx context.Context, outbound_number, inbound_number string) (string, error) {
+	poolQuery, err := a.q.WarehouseQueries(ctx)
+	n := domain.TransferDuration{}
+	if err != nil {
+		log.Printf("err query ListItemsSent: %s", err.Error())
+		return "", err
+	}
+
+	durationInfo, err := poolQuery.CalculateDurationTransfer(ctx, outbound_number, inbound_number)
+	if err != nil {
+		return "", err
+	}
+	n.Duration = durationInfo.Duration
+
+	return n.ReadAsString(), err
 }

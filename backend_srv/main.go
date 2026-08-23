@@ -39,6 +39,7 @@ import (
 var Conn_ *db.Conn
 var MainConn *sql.DB
 
+// signal yg dikirim OS, hasil trigger dari inputan user/human
 var interrupsSignal = []os.Signal{
 	os.Interrupt,
 	syscall.SIGINT,
