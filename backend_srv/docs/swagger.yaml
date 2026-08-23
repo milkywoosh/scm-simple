@@ -135,6 +135,32 @@ paths:
       summary: Input each item one by one(serial_number) in Transaction
       tags:
       - warehouse_service item_transfer
+  /api/v1/warehouse/list-items/:transaction_number:
+    get:
+      consumes:
+      - application/json
+      description: Authorized User can receive this info, limit by authorization token.
+      parameters:
+      - description: transaction number identifier
+        in: path
+        name: request
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: get data transaction number and list of outbound items from warehouse
+      tags:
+      - warehouse_service item_transfer
   /api/v1/warehouse/set-status/:transaction_number/:status:
     put:
       consumes:

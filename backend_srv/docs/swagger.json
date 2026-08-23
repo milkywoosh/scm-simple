@@ -153,6 +153,45 @@
                 }
             }
         },
+        "/api/v1/warehouse/list-items/:transaction_number": {
+            "get": {
+                "description": "Authorized User can receive this info, limit by authorization token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "warehouse_service item_transfer"
+                ],
+                "summary": "get data transaction number and list of outbound items from warehouse",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "transaction number identifier",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/warehouse/set-status/:transaction_number/:status": {
             "put": {
                 "description": "Authorized User can update transaction process (\"submit\", \"reject\", \"cancel\", \"approve\")",
