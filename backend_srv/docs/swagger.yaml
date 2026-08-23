@@ -35,6 +35,11 @@ definitions:
       identifier:
         type: string
     type: object
+  api.InputItemWarehouseInboundParams:
+    properties:
+      identifier:
+        type: string
+    type: object
   api.InputItemWarehouseTransferParams:
     properties:
       identifier:
@@ -52,7 +57,7 @@ info:
   title: scm-simple API
   version: "1.0"
 paths:
-  /api/v1/warehouse/create-draft-inbound:
+  /api/v1/warehouse/inbound/create-draft:
     post:
       consumes:
       - application/json
@@ -77,6 +82,64 @@ paths:
           schema:
             type: string
       summary: Create draft for warehouse inbound
+      tags:
+      - warehouse_service item_transfer
+  /api/v1/warehouse/inbound/input-item/:transaction_number:
+    post:
+      consumes:
+      - application/json
+      description: User scan identifier for each item that will be delivered as AVAILABLE
+      parameters:
+      - description: receiving item transfer payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api.InputItemWarehouseInboundParams'
+      - description: transaction number inbound identifier
+        in: path
+        name: request
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Input each item one by one(serial_number) in Inbound Transaction
+      tags:
+      - warehouse_service item_transfer
+  /api/v1/warehouse/inbound/list-items/:transaction_number:
+    get:
+      consumes:
+      - application/json
+      description: Authorized User can receive this info, limit by authorization token.
+      parameters:
+      - description: transaction number identifier
+        in: path
+        name: request
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: get data transaction number and list of inbound items from warehouse
       tags:
       - warehouse_service item_transfer
   /api/v1/warehouse/outbound/create-draft:

@@ -22,7 +22,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/warehouse/create-draft-inbound": {
+        "/api/v1/warehouse/inbound/create-draft": {
             "post": {
                 "description": "Warehouse inbound receiving all incoming items from warehouse origin",
                 "consumes": [
@@ -44,6 +44,93 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/api.CreateDraftWarehouseInboundParams"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/warehouse/inbound/input-item/:transaction_number": {
+            "post": {
+                "description": "User scan identifier for each item that will be delivered as AVAILABLE",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "warehouse_service item_transfer"
+                ],
+                "summary": "Input each item one by one(serial_number) in Inbound Transaction",
+                "parameters": [
+                    {
+                        "description": "receiving item transfer payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.InputItemWarehouseInboundParams"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "transaction number inbound identifier",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/warehouse/inbound/list-items/:transaction_number": {
+            "get": {
+                "description": "Authorized User can receive this info, limit by authorization token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "warehouse_service item_transfer"
+                ],
+                "summary": "get data transaction number and list of inbound items from warehouse",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "transaction number identifier",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -470,6 +557,14 @@ const docTemplate = `{
             }
         },
         "api.DisallocateItemWarehouseTransferParams": {
+            "type": "object",
+            "properties": {
+                "identifier": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.InputItemWarehouseInboundParams": {
             "type": "object",
             "properties": {
                 "identifier": {
