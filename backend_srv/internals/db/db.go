@@ -76,8 +76,10 @@ func (or *PgDBInstance) BeginAuth(ctx context.Context) (domain.Authentication, e
 
 }
 
-func (or *PgDBInstance) BeginWarehouseToWarehouse(ctx context.Context) (domain.StockTransfer, error) {
+func (or *PgDBInstance) BeginWarehouseToWarehouse(ctx context.Context) (domain.ItemTransfer, error) {
+	// var itemTf domain.ItemTransfer
 	return or.beginTx(ctx)
+
 }
 
 func (or *PgDBInstance) BeginSetLocation(ctx context.Context) (domain.LocationRepository, error) {
@@ -122,4 +124,13 @@ func (or *PgDBInstance) WarehouseQueries(ctx context.Context) (domain.LocationRe
 	}
 
 	return pgQuery.WarehouseRepo(), nil
+}
+
+func (or *PgDBInstance) ItemQueries(ctx context.Context) (domain.ItemRepository, error) {
+	pgQuery, err := or.beginQuery()
+	if err != nil {
+		return nil, err
+	}
+
+	return pgQuery.itemRepo, nil
 }

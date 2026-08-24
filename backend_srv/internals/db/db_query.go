@@ -9,17 +9,19 @@ type pgQuery struct {
 	db           *pgxpool.Pool
 	userRepo     domain.UserRepository
 	locationRepo domain.LocationRepository
-	itemRep		domain.ItemRepository
+	itemRepo     domain.ItemRepository
 }
 
 func newPgQuery(db *pgxpool.Pool) *pgQuery {
 
 	newUserRepo := NewUserRepository(db)
 	newLocationRepo := NewDBLocationRepository(db)
+	newItemRepo := NewDBItemRepository(db)
 
 	return &pgQuery{
 		userRepo:     newUserRepo,
 		locationRepo: newLocationRepo,
+		itemRepo:     newItemRepo,
 	}
 }
 

@@ -11,17 +11,20 @@ type pgTransaction struct {
 	tx pgx.Tx
 	domain.UserRepository
 	domain.LocationRepository
+	domain.ItemRepository
 }
 
 func newPgTx(tx pgx.Tx) *pgTransaction {
 
 	newUserRepo := NewUserRepository(tx)
 	newLocationRepo := NewDBLocationRepository(tx)
+	newItemRepo := NewDBItemRepository(tx)
 
 	return &pgTransaction{
 		tx:                 tx,
 		UserRepository:     newUserRepo,
 		LocationRepository: newLocationRepo,
+		ItemRepository:     newItemRepo,
 	}
 }
 
@@ -39,4 +42,8 @@ func (ot *pgTransaction) UserRepo() domain.UserRepository {
 
 func (ot *pgTransaction) LocationRepo() domain.LocationRepository {
 	return ot.LocationRepository
+}
+
+func (ot *pgTransaction) ItemRepo() domain.ItemRepository {
+	return ot.ItemRepository
 }

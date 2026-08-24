@@ -382,19 +382,25 @@ func (a *WarehouseService) SetApproveInbound(ctx context.Context, transaction_nu
 }
 
 func (a *WarehouseService) ListItemsSent(ctx context.Context, transaction_number string) (domain.WarehouseOutboundInfo, error) {
-	poolQuery, err := a.q.WarehouseQueries(ctx)
+	poolQueryWarerhouse, err := a.q.WarehouseQueries(ctx)
 	if err != nil {
 		log.Printf("err query ListItemsSent: %s", err.Error())
 		return domain.WarehouseOutboundInfo{}, err
 	}
 
-	transactionInfo, err := poolQuery.GetTransactionInfo(ctx, transaction_number)
+	transactionInfo, err := poolQueryWarerhouse.GetTransactionInfo(ctx, transaction_number)
 	if err != nil {
 		log.Printf("err query ListItemsSent 0: %s", err.Error())
 		return domain.WarehouseOutboundInfo{}, err
 	}
 
-	listData, err := poolQuery.GetItemsOnTransaction(ctx, transaction_number)
+	poolQueryItem, err := a.q.ItemQueries(ctx)
+	if err != nil {
+		log.Printf("err query ListItemsSent: %s", err.Error())
+		return domain.WarehouseOutboundInfo{}, err
+	}
+
+	listData, err := poolQueryItem.GetItemsOnTransaction(ctx, transaction_number)
 	if err != nil {
 		log.Printf("err query ListItemsSent 1: %s", err.Error())
 		return domain.WarehouseOutboundInfo{}, err
@@ -407,19 +413,25 @@ func (a *WarehouseService) ListItemsSent(ctx context.Context, transaction_number
 	return n, err
 }
 func (a *WarehouseService) ListItemsReceived(ctx context.Context, transaction_number string) (domain.WarehouseInboundInfo, error) {
-	poolQuery, err := a.q.WarehouseQueries(ctx)
+	poolQueryLocation, err := a.q.WarehouseQueries(ctx)
 	if err != nil {
 		log.Printf("err query ListItemsReceived: %s", err.Error())
 		return domain.WarehouseInboundInfo{}, err
 	}
 
-	transactionInfo, err := poolQuery.GetTransactionInfo(ctx, transaction_number)
+	transactionInfo, err := poolQueryLocation.GetTransactionInfo(ctx, transaction_number)
 	if err != nil {
 		log.Printf("err query ListItemsReceived 0: %s", err.Error())
 		return domain.WarehouseInboundInfo{}, err
 	}
 
-	listData, err := poolQuery.GetItemsOnTransaction(ctx, transaction_number)
+	poolQueryItem, err := a.q.ItemQueries(ctx)
+	if err != nil {
+		log.Printf("err query ListItemsReceived: %s", err.Error())
+		return domain.WarehouseInboundInfo{}, err
+	}
+
+	listData, err := poolQueryItem.GetItemsOnTransaction(ctx, transaction_number)
 	if err != nil {
 		log.Printf("err query ListItemsReceived 1: %s", err.Error())
 		return domain.WarehouseInboundInfo{}, err
@@ -487,20 +499,21 @@ func (a *WarehouseService) CreateDraftInboundTx(ctx context.Context, outbound_nu
 }
 
 func (a *WarehouseService) InfoTransferDuration(ctx context.Context, outbound_number, inbound_number string) (string, error) {
-	poolQuery, err := a.q.WarehouseQueries(ctx)
-	n := domain.TransferDuration{}
+	_, err := a.q.ItemQueries(ctx)
+	// _ := domain.TransferDuration{}
 	if err != nil {
 		log.Printf("err query ListItemsSent: %s", err.Error())
 		return "", err
 	}
 
-	durationInfo, err := poolQuery.CalculateDurationTransfer(ctx, outbound_number, inbound_number)
-	if err != nil {
-		return "", err
-	}
-	n.Duration = durationInfo.Duration
+	// durationInfo, err := poolQuery.CalculateDurationTransfer(ctx, outbound_number, inbound_number)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// n.Duration = durationInfo.Duration
 
-	return n.ReadAsString(), err
+	// return n.ReadAsString(), err
+	return "", nil
 }
 
 func (a *WarehouseService) AllocateInboundItem(ctx context.Context, transaction_number, identifier string) error {

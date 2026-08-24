@@ -21,6 +21,13 @@ type ItemInfo struct {
 type ItemRepository interface {
 	// note kalo error balikin aray kosong aja(?)
 	GetItem(ctx context.Context, identifier string) ([]ItemInfo, error)
+	UnlockItems(ctx context.Context, transaction_number string) error
+	GetItemsOnTransaction(ctx context.Context, transaction_number string) ([]EachItemTransaction, error)
+	AllocateItem(ctx context.Context, transaction_number, identifier string) error
+	DisAllocateItem(ctx context.Context, transaction_number, item string) error
+
+	ReceiveInboundItem(ctx context.Context, transaction_number, identifier string) error
+	CheckTransaction(ctx context.Context, transaction_number string) (TransactionInfo, error)
 }
 
 type WarehouseOutboundInfo struct {
