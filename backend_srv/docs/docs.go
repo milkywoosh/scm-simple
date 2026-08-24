@@ -150,6 +150,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/warehouse/inbound/set-status/:transaction_number/:status": {
+            "put": {
+                "description": "Authorized User can update transaction process (\"submit\", \"reject\", \"cancel\", \"approve\")",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "warehouse_service item_transfer"
+                ],
+                "summary": "set update status Transaction inbound",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "transaction number identifier",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "status to update",
+                        "name": "request",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/warehouse/outbound/create-draft": {
             "post": {
                 "description": "Create New Draft Transaction outbound",

@@ -142,6 +142,38 @@ paths:
       summary: get data transaction number and list of inbound items from warehouse
       tags:
       - warehouse_service item_transfer
+  /api/v1/warehouse/inbound/set-status/:transaction_number/:status:
+    put:
+      consumes:
+      - application/json
+      description: Authorized User can update transaction process ("submit", "reject",
+        "cancel", "approve")
+      parameters:
+      - description: transaction number identifier
+        in: path
+        name: request
+        required: true
+        type: string
+      - description: status to update
+        in: path
+        name: request
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: set update status Transaction inbound
+      tags:
+      - warehouse_service item_transfer
   /api/v1/warehouse/outbound/create-draft:
     post:
       consumes:
