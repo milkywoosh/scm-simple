@@ -115,9 +115,9 @@ func (s *Server) warehouseRoutes() {
 	s.route.GET("/api/v1/warehouse/outbound/list-items/:transaction_number", s.ListItemsSent)
 
 	s.route.POST("/api/v1/warehouse/inbound/create-draft", s.CreateDraftWarehouseInbound)
-	s.route.GET("/api/v1/warehouse/inbound/list-items/:transaction_number", s.ListItemsReceived)
-	s.route.POST("/api/v1/warehouse/inbound/input-item/:transaction_number", s.InputItemWarehouseInbound)
 	s.route.PUT("/api/v1/warehouse/inbound/set-status/:transaction_number/:status", s.SetStatusTransaction)
+	s.route.POST("/api/v1/warehouse/inbound/input-item/:transaction_number", s.InputItemWarehouseInbound)
+	s.route.GET("/api/v1/warehouse/inbound/list-items/:transaction_number", s.ListItemsReceived)
 
 }
 
