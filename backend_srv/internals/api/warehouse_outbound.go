@@ -50,7 +50,7 @@ type CreateDraftWarehouseTransferParams struct {
 	LocationDestination string `json:"location_destination"`
 }
 
-// CreateDraftWarehouseTransfer godoc
+// CreateDraftWarehouseOutbound godoc
 // @Summary      Create New Draft Transaction for outbound
 // @Description  Create New Draft Transaction outbound
 // @Tags         warehouse_service item_transfer
@@ -60,7 +60,7 @@ type CreateDraftWarehouseTransferParams struct {
 // @Success      200  {object}  map[string]any
 // @Failure      400  {string}  ErrorResponse
 // @Router       /api/v1/warehouse/outbound/create-draft [post]
-func (s *Server) CreateDraftWarehouseTransfer(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
+func (s *Server) CreateDraftWarehouseOutbound(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
 
 	ctx := req.Context()
 
@@ -233,7 +233,7 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 		return
 
 	} else if SetStatus == "approve" {
-		err := s.service.WarehouseService.SetApprove(ctx, TransactionNumber)
+		err := s.service.WarehouseService.SetApproveOutbound(ctx, TransactionNumber)
 		if err != nil {
 			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
 			return

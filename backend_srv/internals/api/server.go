@@ -108,14 +108,14 @@ func (s *Server) warehouseRoutes() {
 	s.route.GET("/api/v1/warehouse/info/:location_code", s.GetLocationByLocationCode)
 	s.route.GET("/api/v1/warehouse/transfer-duration/:outbound_number/:inbound_number", s.DurationTransfer)
 
-	s.route.POST("/api/v1/warehouse/outbound/create-draft", s.CreateDraftWarehouseTransfer)
+	s.route.POST("/api/v1/warehouse/outbound/create-draft", s.CreateDraftWarehouseOutbound)
 	s.route.PUT("/api/v1/warehouse/outbound/set-status/:transaction_number/:status", s.SetStatusTransaction)
 	s.route.POST("/api/v1/warehouse/outbound/input-item/:transaction_number", s.InputItemWarehouseTransfer)
 	s.route.POST("/api/v1/warehouse/outbound/disallocate-item/:transaction_number", s.DisallocateItemWarehouseTransfer)
 	s.route.GET("/api/v1/warehouse/outbound/list-items/:transaction_number", s.ListItemsSent)
 
 	s.route.POST("/api/v1/warehouse/inbound/create-draft", s.CreateDraftWarehouseInbound)
-	s.route.PUT("/api/v1/warehouse/inbound/set-status/:transaction_number/:status", s.SetStatusTransaction)
+	s.route.PUT("/api/v1/warehouse/inbound/set-status/:transaction_number/:status", s.SetStatusInboundTransaction)
 	s.route.POST("/api/v1/warehouse/inbound/input-item/:transaction_number", s.InputItemWarehouseInbound)
 	s.route.GET("/api/v1/warehouse/inbound/list-items/:transaction_number", s.ListItemsReceived)
 

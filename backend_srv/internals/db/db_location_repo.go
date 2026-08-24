@@ -96,6 +96,43 @@ func (d *DBLocationRepository) NewDraftTransaction(ctx context.Context, transact
 	return n, nil
 
 }
+func (d *DBLocationRepository) NewDraftInbound(ctx context.Context, transaction_number, outbound_number, transaction_type string) (domain.TransactionInfo, error) {
+
+	query :=
+		`INSERT INTO transaction_item_transfers (
+			transaction_number, 
+			status,
+			transaction_type,
+			origin, -- 4 
+			destination --5
+		) VALUES (
+		 	$1, 
+			$2, 
+			$3, 
+			(select origin from transaction_item_transfers t where t.transaction_number = $4), 
+			(select destination from transaction_item_transfers t where t.transaction_number = $4)
+		)`
+
+	_, err := d.Conn.Exec(
+		ctx,
+		query,
+		transaction_number,
+		"draft",
+		transaction_type,
+		outbound_number,
+	)
+	if err != nil {
+		return domain.TransactionInfo{}, err
+	}
+
+	n := domain.TransactionInfo{}
+	n.TransactionNumber = transaction_number
+	n.TransactionType = transaction_type
+	n.Status = "draft"
+
+	return n, nil
+
+}
 
 func (d *DBLocationRepository) SetStatusTransaction(ctx context.Context, transaction_number, status string) error {
 
@@ -361,6 +398,7 @@ func (d *DBLocationRepository) GetItemsOnTransaction(ctx context.Context, transa
 		log.Printf("err query GetItemsOnTransaction 1: %s", err.Error())
 		return []domain.EachItemTransaction{}, err
 	}
+	defer rows.Close()
 
 	datas := []domain.EachItemTransaction{}
 
@@ -556,5 +594,36 @@ func (d *DBLocationRepository) CalculateDurationTransfer(ctx context.Context, ou
 	}
 
 	return data, nil
+
+}
+
+func (d *DBLocationRepository) UnlockItems(ctx context.Context, transaction_number string) error {
+
+	// fetch transaction_item_transfer_details where (select id from transaction where trans_number = transnumber)
+	// loop update items
+	//	set curr_transaction = NULL
+	// where trans_number = transnumber_param
+
+	datas, err := d.GetItemsOnTransaction(ctx, transaction_number)
+	if err != nil {
+		return err
+	}
+
+	for _, val := range datas {
+
+		query2 := `
+			UPDATE items
+				SET curr_transaction = NULL
+			WHERE curr_transaction = $1
+				and serial_number = $2
+		`
+		_, err := d.Conn.Exec(ctx, query2, transaction_number, val.SerialNumber)
+		if err != nil {
+			log.Printf("err unlock items 1: %s", err.Error())
+			return err
+		}
+	}
+
+	return nil
 
 }

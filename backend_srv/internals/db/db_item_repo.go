@@ -69,5 +69,6 @@ func (d *DBItemRepository) GetItem(ctx context.Context, identifier string) ([]do
 
 		datas = append(datas, data)
 	}
+
 	return datas, nil
 }

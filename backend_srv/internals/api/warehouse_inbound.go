@@ -14,9 +14,7 @@ func (s *Server) GetListAvailableOutbound(w http.ResponseWriter, req *http.Reque
 }
 
 type CreateDraftWarehouseInboundParams struct {
-	LocationOrigin      string `json:"location_origin"`
-	LocationDestination string `json:"location_destination"`
-	OutboundNumber      string `json:"outbound_number"`
+	OutboundNumber string `json:"outbound_number"`
 }
 
 // CreateDraftWarehouseInbound godoc
@@ -43,7 +41,7 @@ func (s *Server) CreateDraftWarehouseInbound(w http.ResponseWriter, req *http.Re
 		return
 	}
 
-	NewDraft, err := s.service.WarehouseService.CreateDraftInboundTx(ctx, ReqBody.LocationOrigin, ReqBody.LocationDestination, ReqBody.OutboundNumber)
+	NewDraft, err := s.service.WarehouseService.CreateDraftInboundTx(ctx, ReqBody.OutboundNumber)
 	if err != nil {
 		DataResp["message"] = err.Error()
 		internals.WriteResponse(w, http.StatusConflict, DataResp)
@@ -158,4 +156,83 @@ func (s *Server) ListItemsReceived(w http.ResponseWriter, req *http.Request, pat
 	RespData["data"] = listItems
 	RespData["message"] = "list of warehouse inbound"
 	internals.WriteResponse(w, http.StatusAccepted, RespData)
+}
+
+// SetStatusInboundTransaction godoc
+// @Summary      set update status Transaction inbound
+// @Description  Authorized User can update transaction process ("submit", "reject", "cancel", "approve")
+// @Tags         warehouse_service item_transfer
+// @Accept       json
+// @Produce      json
+// @Param		 request        path      string  true  "transaction number identifier"
+// @Param		 request        path      string  true  "status to update"
+// @Success      200  {object}  map[string]any
+// @Failure      400  {string}  ErrorResponse
+// @Router       /api/v1/warehouse/inbound/set-status/:transaction_number/:status [put]
+func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
+
+	ctx := req.Context()
+	TransactionNumber := pathParam.ByName("transaction_number")
+	SetStatus := pathParam.ByName("status")
+
+	if SetStatus == "submit" {
+		err := s.service.WarehouseService.SetSubmit(ctx, TransactionNumber)
+		if err != nil {
+			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			return
+		}
+
+		RespData := make(map[string]any)
+		RespData["message"] = "update status berhasil"
+		RespData["transaction_number"] = TransactionNumber
+
+		internals.WriteResponse(w, http.StatusAccepted, RespData)
+		return
+	} else if SetStatus == "cancel" {
+
+		err := s.service.WarehouseService.SetCancelInbound(ctx, TransactionNumber)
+		if err != nil {
+			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			return
+		}
+
+		RespData := make(map[string]any)
+		RespData["message"] = "update status berhasil"
+		RespData["transaction_number"] = TransactionNumber
+
+		internals.WriteResponse(w, http.StatusAccepted, RespData)
+		return
+	} else if SetStatus == "reject" {
+		err := s.service.WarehouseService.SetReject(ctx, TransactionNumber)
+		if err != nil {
+			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			return
+		}
+
+		RespData := make(map[string]any)
+		RespData["message"] = "update status berhasil"
+		RespData["transaction_number"] = TransactionNumber
+
+		internals.WriteResponse(w, http.StatusAccepted, RespData)
+		return
+
+	} else if SetStatus == "approve" {
+		err := s.service.WarehouseService.SetApproveInbound(ctx, TransactionNumber)
+		if err != nil {
+			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			return
+		}
+
+		RespData := make(map[string]any)
+		RespData["message"] = "update status warehouse inbound berhasil"
+		RespData["transaction_number"] = TransactionNumber
+
+		internals.WriteResponse(w, http.StatusAccepted, RespData)
+		return
+	} else {
+		internals.WriteErrorResponse(w, http.StatusBadRequest, "Proses ini tidak dapat dilakukan. Request tersedia hanya ada (submit, cancel, reject, approve)")
+		return
+
+	}
+
 }

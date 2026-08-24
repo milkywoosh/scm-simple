@@ -266,8 +266,46 @@ func (a *WarehouseService) SetCancel(ctx context.Context, transaction_number str
 	}
 	return nil
 }
+func (a *WarehouseService) SetCancelInbound(ctx context.Context, transaction_number string) error {
 
-func (a *WarehouseService) SetApprove(ctx context.Context, transaction_number string) error {
+	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	TransactionInfo, err := tx.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		return err
+	}
+
+	CurrStatus := TransactionInfo.Status
+	if CurrStatus == "approved" || CurrStatus == "canceled" {
+		msg := fmt.Sprintf("Status transaksi sudah %s, tidak dapat diubah kembali.", CurrStatus)
+		return errors.New(msg)
+	}
+
+	if CurrStatus == "submitted" {
+		msg := fmt.Sprintf("Status transaksi saat ini %s, silahkan reject terlebih dahulu.", CurrStatus)
+		return errors.New(msg)
+	}
+
+	err = tx.SetStatusTransaction(ctx, transaction_number, "canceled")
+	if err != nil {
+		log.Printf("err SetStatusTransaction reject: %s", err.Error())
+		log.Printf("err SetStatusTransaction reject: %s", err.Error())
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		log.Printf("err SetStatusTransaction reject commit 1: %s", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (a *WarehouseService) SetApproveOutbound(ctx context.Context, transaction_number string) error {
 	// need RBAC
 	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
 	if err != nil {
@@ -301,6 +339,43 @@ func (a *WarehouseService) SetApprove(ctx context.Context, transaction_number st
 	err = tx.Commit(ctx)
 	if err != nil {
 		log.Printf("err SetStatusTransaction approve commit 1: %s", err.Error())
+		return err
+	}
+	return nil
+}
+func (a *WarehouseService) SetApproveInbound(ctx context.Context, transaction_number string) error {
+	// need RBAC
+	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	TransactionInfo, err := tx.CheckTransaction(ctx, transaction_number)
+	if err != nil {
+		return err
+	}
+
+	CurrStatus := TransactionInfo.Status
+	if CurrStatus != "submitted" {
+		msg := fmt.Sprintf("status transaksi saat ini bukan submitted tapi %s", CurrStatus)
+		return errors.New(msg)
+	}
+
+	err = tx.SetStatusTransaction(ctx, transaction_number, "approved")
+	if err != nil {
+		log.Printf("err SetApproveInbound approve: %s", err.Error())
+		return err
+	}
+
+	err = tx.UnlockItems(ctx, transaction_number)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		log.Printf("err SetApproveInbound approve commit 1: %s", err.Error())
 		return err
 	}
 	return nil
@@ -359,7 +434,7 @@ func (a *WarehouseService) ListItemsReceived(ctx context.Context, transaction_nu
 
 // todo : create notification to warehouse inbound, isi: info outbound" number yg akan masuk
 // warehouse receive
-func (a *WarehouseService) CreateDraftInboundTx(ctx context.Context, location_receiver, location_sender, outbound_number string) (WarehouseTransferHeader, error) {
+func (a *WarehouseService) CreateDraftInboundTx(ctx context.Context, outbound_number string) (WarehouseTransferHeader, error) {
 	tx, err := a.uow.BeginWarehouseToWarehouse(ctx)
 	log.Printf("errr CreateDraftInboundTx %v", err)
 	n := WarehouseTransferHeader{}
@@ -385,7 +460,7 @@ func (a *WarehouseService) CreateDraftInboundTx(ctx context.Context, location_re
 	// as inbound number
 	transaction_number := fmt.Sprintf("WH_INBOUND_%s_%s", currdate, randString)
 
-	new_transaction, err := tx.NewDraftTransaction(ctx, transaction_number, "warehouse_to_warehouse", location_sender, location_receiver)
+	new_transaction, err := tx.NewDraftInbound(ctx, transaction_number, outbound_number, "warehouse_to_warehouse")
 	if err != nil {
 		log.Printf("errr CreateDraftInboundTx 1 %v", err)
 		if err != nil {

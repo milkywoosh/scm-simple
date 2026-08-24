@@ -47,6 +47,7 @@ type TransactionInfo struct {
 type LocationRepository interface {
 	GetLocation(ctx context.Context, locationCode string, typeLocation LocationType) ([]LocationRow, error)
 	NewDraftTransaction(ctx context.Context, transaction_number, transaction_type, origin, destination string) (TransactionInfo, error)
+	NewDraftInbound(ctx context.Context, transaction_number, outbound_number, transaction_type string) (TransactionInfo, error)
 	CheckTransaction(ctx context.Context, transaction_number string) (TransactionInfo, error)
 	SetStatusTransaction(ctx context.Context, transaction_number, status string) error
 	// literary like a location send items
@@ -64,6 +65,7 @@ type LocationRepository interface {
 	ReceiveInboundItem(ctx context.Context, transaction_number, identifier string) error
 
 	CalculateDurationTransfer(ctx context.Context, outbound_number, inbound_number string) (TransferDuration, error)
+	UnlockItems(ctx context.Context, transaction_number string) error
 }
 
 type StockTransfer interface {
