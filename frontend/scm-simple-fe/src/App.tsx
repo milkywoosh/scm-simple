@@ -9,15 +9,17 @@ function App() {
 
   return (
     <>
-      <section id="center">
+      <section id="center bg-red-200">
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
           <img src={reactLogo} className="framework" alt="React logo" />
           <img src={viteLogo} className="vite" alt="Vite logo" />
         </div>
 
-        <div>
-          <h1>Heloo Luke</h1>
+        <div className="">
+          <h1 className="italic">
+            Heloo Luke
+          </h1>
           <p>
             Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
           </p>
