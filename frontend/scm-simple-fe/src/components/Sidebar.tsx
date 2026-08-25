@@ -36,22 +36,38 @@ export function Sidebar() {
 
           return (
             <div key={group.label} className="mb-3">
-              <div
-                // type="button"
+              <button
+                type="button"
                 onClick={() => setOpenGroup(isOpen ? null : group.label)}
-                className={`flex-5 w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${isGroupActive
-                    ? '-soft -active'
-                    : ' hover:-soft/60 hover:-active'
+                className={`flex w-full border border-black items-start rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${isGroupActive
+                  ? '-soft -active'
+                  : ' hover:-soft/60 hover:-active'
                   }`}
               >
-              
-                  <span className="flex-3">{group.label}</span>
-                  <span
-                    className={`text-xs transition-transform ${isOpen ? 'rotate-90' : ''}`}
+
+                <span className="flex-1">{group.label}</span>
+
+                <span
+                  className={`inline-block  transition-transform duration-200 ${isOpen ? "rotate-90" : ""
+                    }`}
+                >
+
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="h-4 w-4"
                   >
-                    &gt;
-                  </span>
-              </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                    />
+                  </svg>
+                </span>
+              </button>
 
               {isOpen && (
                 <ul className="ml-4 mt-1 space-y-0.5 border-l border-white/10 pl-4">
@@ -62,8 +78,8 @@ export function Sidebar() {
                         <Link
                           to={leaf.path}
                           className={`block rounded-md px-2.5 py-1.5 text-sm transition-colors ${isLeafActive
-                              ? 'bg-signal-soft text-rail font-medium'
-                              : ' hover:-active'
+                            ? 'bg-signal-soft text-rail font-medium'
+                            : ' hover:-active'
                             }`}
                         >
                           {leaf.label}

@@ -4,7 +4,14 @@ import { Topbar } from '../components/Topbar'
 
 export function AppLayout() {
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-auto gap-x-4">
+    <div className="
+      flex 
+      h-screen 
+      w-screen 
+      overflow-hidden
+      bg-auto 
+      gap-x-4"
+    >
       <Sidebar />
 
       <div className="flex min-w-2 flex-1 flex-col">
@@ -13,7 +20,7 @@ export function AppLayout() {
           <Outlet />
         </main>
       </div>
-    
+
     </div>
   )
 }
