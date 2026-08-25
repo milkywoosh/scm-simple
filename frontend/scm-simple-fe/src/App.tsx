@@ -1,125 +1,52 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { Navigate, Route, Routes } from 'react-router'
+import { AppLayout } from './layouts/AppLayout'
+import { SearchPage } from './pages/items/SearchPage'
+import { ProductsPage } from './pages/items/ProductsPage'
+import { SuppliersPage } from './pages/items/SuppliersPage'
+import { WarehouseTransferPage } from './pages/transfer/WarehousePage'
+import { TechnicianTransferPage } from './pages/transfer/TechnicianPage'
+import { CustomerTransferPage } from './pages/transfer/CustomerPage'
+import { WarehouseLocationsPage } from './pages/locations/WarehousePage'
+import { TechnicianLocationsPage } from './pages/locations/TechnicianPage'
+import { CustomerLocationsPage } from './pages/locations/CustomerPage'
 
+// Declarative mode: routes are described as JSX (<Routes>/<Route>) rather than
+// built as a route-object tree with createBrowserRouter (data mode).
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center bg-red-200">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    <Routes>
+      <Route element={<AppLayout />}>
+      
+        <Route index element={<Navigate to="/items/search" replace />} />
 
-        <div className="">
-          <h1 className="italic">
-            Heloo Luke
-          </h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
+        <Route path="items">
+          <Route path="search" element={<SearchPage />} />
+          <Route path="products" element={<ProductsPage />} />
+          <Route path="suppliers" element={<SuppliersPage />} />
+        </Route>
 
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        <Route path="locations">
+          <Route path="warehouse" element={<WarehouseLocationsPage />} />
+          <Route path="technician" element={<TechnicianLocationsPage />} />
+          <Route path="customer" element={<CustomerLocationsPage />} />
+        </Route>
 
-      <div className="ticks"></div>
+        <Route path="transfer">
+          <Route path="warehouse" element={<WarehouseTransferPage />} />
+          <Route path="technician" element={<TechnicianTransferPage />} />
+          <Route path="customer" element={<CustomerTransferPage />} />
+        </Route>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        <Route
+          path="*"
+          element={
+            <div className="flex h-full items-center justify-center text-sm text-ink-soft">
+              Page not found.
+            </div>
+          }
+        />
+      </Route>
+    </Routes>
   )
 }
 
