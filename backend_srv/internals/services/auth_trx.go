@@ -22,10 +22,13 @@ func (a *AuthenticationService) UserRegistrationTx(ctx context.Context, username
 		return errCreate
 	}
 
-	errAfterCreate := afterCreate(username)
-	if errAfterCreate != nil {
-		return errAfterCreate
-	}
+	// off
+	/*
+		errAfterCreate := afterCreate(username)
+		if errAfterCreate != nil {
+			return errAfterCreate
+		}
+	*/
 
 	return tx.Commit(ctx)
 

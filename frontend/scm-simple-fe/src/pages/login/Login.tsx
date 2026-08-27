@@ -30,13 +30,13 @@ export function Login() {
 
     return (
         <main className="flex min-h-screen items-center justify-center bg-slate-100 px-6 py-12">
-            <section className="w-full max-w-md rounded-lg border border-slate-300 bg-white p-8 shadow-sm">
+            <section className="flex-1 m-1 w-full max-w-md rounded-lg border border-slate-300 bg-white p-8 shadow-sm">
                 <div className="mb-8">
-                    <p className="font-mono text-xs text-center uppercase tracking-[0.2em] text-slate-500">
+                    <p className="font-mono text-md text-center uppercase tracking-[0.2em] text-slate-500">
                         {Terminology.scm_simple}
                     </p>
                     <h1 className="mt-3 text-2xl font-semibold text-slate-900">Sign in</h1>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 text-sm text-sl  text-slate-600">
                         Authenticate to access inventory operations.
                     </p>
                 </div>

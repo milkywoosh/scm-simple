@@ -110,8 +110,8 @@ func (s *Server) warehouseRoutes() {
 
 func (s *Server) userRoutes() {
 
-	s.route.POST("/api/user/v1/registration", nil)
-	// s.route.POST("/api/user/v1/registration", s.UserRegistration)
+	// s.route.POST("/api/user/v1/registration", nil)
+	s.route.POST("/api/user/v1/registration", s.UserRegistration)
 	// s.route.GET("/api/user/v1/login", s.Login)
 	// s.route.POST("/api/user/v1/verify-secret-code", s.VerifyEmailSecretCode)
 }
