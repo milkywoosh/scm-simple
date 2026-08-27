@@ -22,9 +22,10 @@ func (d *DBUserRepository) CreateUser(ctx context.Context, username string, pass
 
 	query :=
 		`INSERT INTO users 
-		(username, hashed_password,full_name,email,password_changed_at,created_at) 
-	 VALUES
-	 	($1      , $2             ,$3       ,$4   ,now()              ,now())`
+			(username, hashed_password,full_name,email,password_changed_at,created_at) 
+	 	VALUES
+	 		($1      , $2             ,$3       ,$4   ,now()              ,now())
+		`
 
 	_, err := d.Conn.Exec(
 		ctx,
@@ -40,15 +41,8 @@ func (d *DBUserRepository) CreateUser(ctx context.Context, username string, pass
 	return nil
 }
 
-type UserRow struct {
-	Username       sql.NullString
-	HashedPassword sql.NullString
-	CreatedAt      sql.NullTime
-	Email          sql.NullString
-	Fullname       sql.NullString
-}
 
-func DTOUser(source UserRow) domain.User {
+func DTOUser(source domain.UserRow) domain.User {
 	return domain.User{
 		Username:       source.Username.String,
 		HashedPassword: source.HashedPassword.String,
@@ -60,7 +54,7 @@ func DTOUser(source UserRow) domain.User {
 
 func (d *DBUserRepository) GetUser(ctx context.Context, username string) (domain.User, error) {
 
-	var user UserRow
+	var user domain.UserRow
 
 	query := `select username, full_name, email, hashed_password, created_at from users where username = $1`
 
@@ -165,3 +159,6 @@ func (d *DBUserRepository) VerifySecretCode(ctx context.Context, username string
 	return verifyData.Email.String, nil
 
 }
+
+
+

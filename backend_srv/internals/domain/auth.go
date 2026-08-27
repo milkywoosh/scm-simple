@@ -3,6 +3,8 @@ package domain
 import (
 	"context"
 	"time"
+
+	"scm-simple-luke.com/dir/internals"
 )
 
 type UserRepository interface {
@@ -22,6 +24,14 @@ type User struct {
 	PasswordChangedAt time.Time  `json:"password_changed_at"`
 	IsEmailVerified   bool       `json:"is_email_verified"`
 	Role              string     `json:"role"`
+}
+
+type UserRow struct {
+	Username       internals.NullString `json:"username"`
+	HashedPassword internals.NullString `json:"password"`
+	CreatedAt      internals.NullTime   `json:"created_at"`
+	Email          internals.NullString `json:"email"`
+	Fullname       internals.NullString `json:"full_name"`
 }
 
 type Authentication interface {
