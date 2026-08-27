@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"scm-simple-luke.com/dir/internals/domain"
+	"log"
 )
 
 type DBUserRepository struct {
@@ -56,7 +57,16 @@ func (d *DBUserRepository) GetUser(ctx context.Context, username string) (domain
 
 	var user domain.UserRow
 
-	query := `select username, full_name, email, hashed_password, created_at from users where username = $1`
+	query := `
+		SELECT 
+			username, 
+			full_name, 
+			email, 
+			hashed_password, 
+			created_at 
+		FROM users 
+			WHERE username = $1
+	`
 
 	row := d.Conn.QueryRow(ctx, query, username)
 	if err := row.Scan(
@@ -66,6 +76,7 @@ func (d *DBUserRepository) GetUser(ctx context.Context, username string) (domain
 		&user.HashedPassword,
 		&user.CreatedAt,
 	); err != nil {
+		log.Printf("GetUser err 1: ", err.Error())
 		if err == sql.ErrNoRows {
 			return domain.User{}, err
 		}
