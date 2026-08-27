@@ -89,8 +89,8 @@ func (s *Server) setupRoutes() {
 	s.swaggerRoute()
 	s.callInit()
 	s.warehouseRoutes()
+	s.userRoutes()
 
-	// s.userRoutes()
 	// s.stockTransferRoutes() // each of stock_transfer route
 }
 
@@ -122,10 +122,8 @@ func (s *Server) warehouseRoutes() {
 }
 
 func (s *Server) userRoutes() {
-
-	// s.route.POST("/api/user/v1/registration", nil)
-	s.route.POST("/api/user/v1/registration", s.UserRegistration)
-	// s.route.GET("/api/user/v1/login", s.Login)
+	s.route.POST("/api/v1/user/signin", s.Login)
+	s.route.POST("/api/v1/user/registration", s.UserRegistration)
 	// s.route.POST("/api/user/v1/verify-secret-code", s.VerifyEmailSecretCode)
 }
 

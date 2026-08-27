@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 
+	"log"
+
 	"github.com/jackc/pgx/v5/pgtype"
 	"scm-simple-luke.com/dir/internals/domain"
-	"log"
 )
 
 type DBUserRepository struct {
@@ -42,18 +43,7 @@ func (d *DBUserRepository) CreateUser(ctx context.Context, username string, pass
 	return nil
 }
 
-
-func DTOUser(source domain.UserRow) domain.User {
-	return domain.User{
-		Username:       source.Username.String,
-		HashedPassword: source.HashedPassword.String,
-		CreatedAt:      &source.CreatedAt.Time,
-		Email:          source.Email.String,
-		FullName:       source.Fullname.String,
-	}
-}
-
-func (d *DBUserRepository) GetUser(ctx context.Context, username string) (domain.User, error) {
+func (d *DBUserRepository) GetUser(ctx context.Context, username string) (domain.UserRow, error) {
 
 	var user domain.UserRow
 
@@ -78,12 +68,12 @@ func (d *DBUserRepository) GetUser(ctx context.Context, username string) (domain
 	); err != nil {
 		log.Printf("GetUser err 1: ", err.Error())
 		if err == sql.ErrNoRows {
-			return domain.User{}, err
+			return domain.UserRow{}, err
 		}
-		return domain.User{}, err
+		return domain.UserRow{}, err
 	}
 
-	return DTOUser(user), nil
+	return user, nil
 
 }
 
@@ -170,6 +160,3 @@ func (d *DBUserRepository) VerifySecretCode(ctx context.Context, username string
 	return verifyData.Email.String, nil
 
 }
-
-
-

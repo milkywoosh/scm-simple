@@ -32,23 +32,22 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 	}
 
 	userInfo, err := s.service.GetInfoUser(r.Context(), req.Username)
-
 	if err != nil {
 		internals.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	err = utils.ComparePassword(userInfo.HashedPassword, req.Password)
+	err = utils.ComparePassword(userInfo.HashedPassword.String, req.Password)
 	if err != nil {
-		internals.WriteErrorResponse(w, http.StatusNotAcceptable, err.Error())
+		internals.WriteErrorResponse(w, http.StatusNotFound, err.Error())
 		return
 	}
 	// w.WriteHeader(http.StatusAccepted)
 	// json.NewEncoder(w).Encode("error")
 
 	var responseData map[string]any = make(map[string]any)
-	responseData["Message"] = "sukses login"
-	responseData["Data"] = userInfo
+	responseData["message"] = "sukses login"
+	responseData["data"] = userInfo
 	internals.WriteResponse(w, http.StatusOK, responseData)
 
 }
@@ -106,8 +105,8 @@ func (s *Server) UserRegistration(w http.ResponseWriter, r *http.Request, _ http
 		return
 	}
 	var responseData map[string]any = make(map[string]any)
-	responseData["Message"] = "sukses registrasi user baru"
-	responseData["Data"] = nil
+	responseData["message"] = "sukses registrasi user baru"
+	responseData["data"] = nil
 	internals.WriteResponse(w, http.StatusOK, responseData)
 
 }

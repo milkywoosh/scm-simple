@@ -1,8 +1,8 @@
--- table users
 
+-- 
 
 CREATE TABLE users (
-    id serial primary key
+    id serial primary key,
     username varchar(60) unique, 
     hashed_password varchar(100),
     full_name varchar(100),
