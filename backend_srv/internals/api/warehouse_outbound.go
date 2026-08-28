@@ -28,6 +28,9 @@ type LocationSearchResponse struct {
 // @Router       /api/warehouse/:location_code [get]
 func (s *Server) GetLocationByLocationCode(w http.ResponseWriter, req *http.Request, pathParam httprouter.Params) {
 
+	log.Printf("from authMiddlewareV2: %s", req.Header.Get("authorization"))
+	log.Printf("from level1: %s", req.Header.Get("pass1"))
+
 	locationCode := pathParam.ByName("location_code")
 
 	whInfo, err := s.service.WarehouseInfo(req.Context(), locationCode)

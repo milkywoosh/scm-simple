@@ -45,10 +45,10 @@ func NewServer(cfg utils.Config, services *services.Services, token token.TokenM
 		taskDistributor: taskDistributor,
 	}
 
-	var handler http.Handler = authMiddleware(s.route)
+	// var handler http.Handler = authMiddleware(s.route)
 
 	srv := &http.Server{
-		Handler: handler,
+		Handler: newHttpRouter,
 		Addr:    addr,
 	}
 
@@ -96,7 +96,6 @@ func (s *Server) setupRoutes() {
 
 	s.swaggerRoute()
 	s.callInit()
-
 	s.warehouseRoutes()
 	s.userRoutes()
 
@@ -114,7 +113,10 @@ func (s *Server) callInit() {
 }
 
 func (s *Server) warehouseRoutes() {
-	s.route.GET("/api/v1/warehouse/info/:location_code", s.GetLocationByLocationCode)
+
+	// implement Handle type
+	s.route.GET("/api/v1/warehouse/info/:location_code", authMiddlewareV2(level1(s.GetLocationByLocationCode)))
+	// s.route.GET("/api/v1/warehouse/info/:location_code", s.GetLocationByLocationCode)
 	s.route.GET("/api/v1/warehouse/transfer-duration/:outbound_number/:inbound_number", s.DurationTransfer)
 
 	s.route.POST("/api/v1/warehouse/outbound/create-draft", s.CreateDraftWarehouseOutbound)
