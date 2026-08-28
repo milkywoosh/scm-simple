@@ -7,31 +7,33 @@ import (
 	_ "encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/julienschmidt/httprouter"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"scm-simple-luke.com/dir/internals"
 	"scm-simple-luke.com/dir/internals/services"
+	"scm-simple-luke.com/dir/internals/token"
+	"scm-simple-luke.com/dir/internals/utils"
 )
 
 type Server struct {
+	config          utils.Config
 	srvInit         *http.Server
 	route           *httprouter.Router
 	service         *services.Services
-	token           string
+	token           token.TokenMaker
 	taskDistributor any //worker.TaskDistributor
 }
 
 type ErrorResponse string
 
-func NewServer(services *services.Services, taskDistributor any) (*Server, error) {
+func NewServer(cfg utils.Config, services *services.Services, token token.TokenMaker, taskDistributor any) (*Server, error) {
 
 	// need token maker here JWT or Paseto
 
 	newHttpRouter := httprouter.New()
 
-	addr := fmt.Sprintf("%s:%s", os.Getenv("ADDR"), os.Getenv("PORT"))
+	addr := fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port)
 
 	srv := &http.Server{
 		Handler: newHttpRouter,
@@ -40,8 +42,10 @@ func NewServer(services *services.Services, taskDistributor any) (*Server, error
 
 	// note: watch out about http and route, both should be in sync
 	s := &Server{
+		config:          cfg,
 		srvInit:         srv,
 		route:           newHttpRouter, // httprouter.New()
+		token:           token,
 		service:         services,
 		taskDistributor: taskDistributor,
 	}

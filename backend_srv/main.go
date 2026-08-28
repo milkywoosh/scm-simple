@@ -5,16 +5,18 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/joho/godotenv"
 	"golang.org/x/sync/errgroup"
 	_ "scm-simple-luke.com/dir/docs"
 	"scm-simple-luke.com/dir/internals/api"
 	"scm-simple-luke.com/dir/internals/db"
+	"scm-simple-luke.com/dir/internals/token"
+	"scm-simple-luke.com/dir/internals/utils"
 
 	"scm-simple-luke.com/dir/internals/services"
 )
@@ -48,11 +50,17 @@ var interrupsSignal = []os.Signal{
 
 func runRestAPIServer(
 	ctx context.Context,
+	config utils.Config,
 	waitGroup *errgroup.Group,
 	service *services.Services,
 	taskDistributor any, // worker.TaskDistributor
 ) {
-	serverREST, err := api.NewServer(service, taskDistributor)
+
+	newMaker, err := token.NewJWTMaker("7c2f6152b065929f57da4df44bc704d8")
+	if err != nil {
+		log.Fatalf("err info token maker: %s", err.Error())
+	}
+	serverREST, err := api.NewServer(config, service, newMaker, taskDistributor)
 	if err != nil {
 		log.Fatalf("err info server: %v", err)
 	}
@@ -60,9 +68,9 @@ func runRestAPIServer(
 	// Start the server immediately
 
 	waitGroup.Go(func() error {
-		log.Printf("starting HTTP server on %s", os.Getenv("PORT"))
+		log.Printf("starting HTTP server on %s", config.Port)
 
-		if err := serverREST.Start(os.Getenv("PORT")); err != nil {
+		if err := serverREST.Start(config.Port); err != nil {
 			log.Printf("HTTP server error: %v", err)
 			return err
 		}
@@ -73,12 +81,19 @@ func runRestAPIServer(
 	})
 
 	waitGroup.Go(func() error {
+		log.Printf("blocking cancelation signal from OS process...")
 		// Wait for cancellation signal (CTRL+C, SIGTERM, etc.)
 		<-ctx.Done()
+		log.Printf("after receive cancelation signal from OS process...")
 
 		log.Println("graceful shutdown HTTP server...")
 
-		if err := serverREST.Shutdown(ctx); err != nil {
+		// give sometime to active connection before server really close
+		log.Printf("give sometime to active connection before server really close")
+		shutdownCtx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancelFunc()
+
+		if err := serverREST.Shutdown(shutdownCtx); err != nil {
 			log.Printf("forced shutdown: %v", err)
 			return err
 		}
@@ -86,21 +101,22 @@ func runRestAPIServer(
 		log.Println("HTTP server stopped cleanly")
 		return nil
 	})
+
 }
 
 func main() {
 
-	err := godotenv.Load("../.env")
+	config, err := utils.LoadConfig("../")
 	if err != nil {
-		log.Printf("err load .env: %v ==> **only used in local dev, ignore on production", err)
+		log.Printf("err load config: %s", err.Error())
+		return
 	}
-	fmt.Printf("%s\n", "cuss 1 scm")
 
 	ctx, stop := signal.NotifyContext(context.Background(), interrupsSignal...)
 	defer stop()
 
 	// variable dipake nanti
-	Conn_, err = db.NewConn(ctx, os.Getenv("PG_CONNSTRING"))
+	Conn_, err = db.NewConn(ctx, config.DBSource)
 	// log.Printf("log err: %s", err.Error())
 	if err != nil {
 		log.Printf("error init DB ====>: %s\n", err.Error())
@@ -114,7 +130,7 @@ func main() {
 	waitGroup, ctxWg := errgroup.WithContext(ctx)
 
 	// process2, task will be Enqueued if CALLED via http req
-	runRestAPIServer(ctxWg, waitGroup, newServices, nil)
+	runRestAPIServer(ctxWg, config, waitGroup, newServices, nil)
 
 	// process3
 	// ================ get err after wait several process

@@ -14,7 +14,7 @@ func TestDBPositiveCase1(t *testing.T) {
 	ctxBg := context.Background()
 
 	// variable dipake nanti
-	_, err := NewConn(ctxBg, os.Getenv("PG_CONNSTRING"))
+	_, err := NewConn(ctxBg, config.DBSource)
 
 	if err != nil {
 		// log.Fatalf("error init DB ====>: %s\n", err.Error())

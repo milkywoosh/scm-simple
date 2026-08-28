@@ -45,9 +45,20 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 	// w.WriteHeader(http.StatusAccepted)
 	// json.NewEncoder(w).Encode("error")
 
+	log.Printf("info username: %s", userInfo.Username.String)
+	log.Printf("s.config.AccessTokenDuration: %s", s.config.AccessTokenDuration)
+	
+	accessToken, payload, err := s.token.CreateToken(userInfo.Username.String, "admin", s.config.AccessTokenDuration)
+	if err != nil {
+		internals.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	var responseData map[string]any = make(map[string]any)
 	responseData["message"] = "sukses login"
 	responseData["data"] = userInfo
+	responseData["access_token"] = accessToken
+	responseData["payload"] = payload
 	internals.WriteResponse(w, http.StatusOK, responseData)
 
 }

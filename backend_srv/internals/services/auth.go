@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"scm-simple-luke.com/dir/internals/domain"
 )
@@ -109,6 +110,19 @@ func (a *AuthenticationService) VerifyEmailSecretCodeTx(ctx context.Context, use
 	return nil
 }
 
+func (a *AuthenticationService) UserRegistration(ctx context.Context, username string, password string) error {
+	_, err := a.q.AuthQueries(ctx)
+	if err != nil {
+		return err
+	}
+
+	// err = auth.CreateUser(ctx, username, password)
+	// if err != nil {
+	// 	return err
+	// }
+	return nil
+}
+
 func (a *AuthenticationService) GetInfoUser(ctx context.Context, username string) (domain.UserRow, error) {
 
 	auth, err := a.q.AuthQueries(ctx)
@@ -121,4 +135,18 @@ func (a *AuthenticationService) GetInfoUser(ctx context.Context, username string
 		return domain.UserRow{}, err
 	}
 	return userInfo, err
+}
+
+func (a *AuthenticationService) GetSession(ctx context.Context, uuid uuid.UUID) (domain.Session, error) {
+	auth, err := a.q.AuthQueries(ctx)
+	if err != nil {
+		return domain.Session{}, err
+	}
+
+	session, err := auth.GetSession(ctx, uuid)
+	if err != nil {
+		return domain.Session{}, err
+	}
+
+	return session, nil
 }

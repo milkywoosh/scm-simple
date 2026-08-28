@@ -6,6 +6,7 @@ import (
 
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"scm-simple-luke.com/dir/internals/domain"
 )
@@ -159,4 +160,26 @@ func (d *DBUserRepository) VerifySecretCode(ctx context.Context, username string
 
 	return verifyData.Email.String, nil
 
+}
+
+func (q *DBUserRepository) GetSession(ctx context.Context, id uuid.UUID) (domain.Session, error) {
+
+	const getSession = `-- name: GetSession :one
+	SELECT id, username, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at FROM sessions
+	WHERE id = $1 LIMIT 1
+	`
+
+	row := q.Conn.QueryRow(ctx, getSession, id)
+	var i domain.Session
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.RefreshToken,
+		&i.UserAgent,
+		&i.ClientIp,
+		&i.IsBlocked,
+		&i.ExpiresAt,
+		&i.CreatedAt,
+	)
+	return i, err
 }
