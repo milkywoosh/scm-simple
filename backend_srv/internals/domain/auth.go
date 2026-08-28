@@ -2,9 +2,22 @@ package domain
 
 import (
 	"context"
+	"time"
 
+	"github.com/google/uuid"
 	"scm-simple-luke.com/dir/internals"
 )
+
+type Session struct {
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	RefreshToken string    `json:"refresh_token"`
+	UserAgent    string    `json:"user_agent"`
+	ClientIp     string    `json:"client_ip"`
+	IsBlocked    bool      `json:"is_blocked"`
+	ExpiresAt    time.Time `json:"expires_at"`
+	CreatedAt    time.Time `json:"created_at"`
+}
 
 type UserRepository interface {
 	CreateUser(ctx context.Context, username string, password string, full_name string, email string) error
@@ -12,6 +25,7 @@ type UserRepository interface {
 	CreateVerifyEmail(ctx context.Context, username string, email string, secret_code string) (InfoEmailVerification, error)
 	VerifyEmail(ctx context.Context, email string) error
 	VerifySecretCode(ctx context.Context, username string, secret_code string) (string, error)
+	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 }
 
 type User struct {
