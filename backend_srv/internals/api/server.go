@@ -35,20 +35,24 @@ func NewServer(cfg utils.Config, services *services.Services, token token.TokenM
 
 	addr := fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port)
 
-	srv := &http.Server{
-		Handler: newHttpRouter,
-		Addr:    addr,
-	}
-
 	// note: watch out about http and route, both should be in sync
 	s := &Server{
 		config:          cfg,
-		srvInit:         srv,
+		srvInit:         nil,
 		route:           newHttpRouter, // httprouter.New()
 		token:           token,
 		service:         services,
 		taskDistributor: taskDistributor,
 	}
+
+	var handler http.Handler = authMiddleware(s.route)
+
+	srv := &http.Server{
+		Handler: handler,
+		Addr:    addr,
+	}
+
+	s.srvInit = srv
 
 	s.setupRoutes()
 	return s, nil
@@ -92,6 +96,7 @@ func (s *Server) setupRoutes() {
 
 	s.swaggerRoute()
 	s.callInit()
+
 	s.warehouseRoutes()
 	s.userRoutes()
 
