@@ -109,7 +109,7 @@ func (s *Server) swaggerRoute() {
 }
 
 func (s *Server) callInit() {
-	s.route.GET("/api/v1/test-init/:transaction_id", CallTestInit)
+	s.route.GET("/api/v1/test-init/:transaction_id", authMiddlewareV2(s.token, CallTestInit))
 }
 
 func (s *Server) warehouseRoutes() {
