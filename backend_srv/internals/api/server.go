@@ -115,7 +115,7 @@ func (s *Server) callInit() {
 func (s *Server) warehouseRoutes() {
 
 	// implement httprouter.Handle type
-	s.route.GET("/api/v1/warehouse/info/:location_code", authMiddlewareV2(level1(s.GetLocationByLocationCode)))
+	s.route.GET("/api/v1/warehouse/info/:location_code", authMiddlewareV2(s.token, s.GetLocationByLocationCode))
 	// s.route.GET("/api/v1/warehouse/info/:location_code", s.GetLocationByLocationCode)
 	s.route.GET("/api/v1/warehouse/transfer-duration/:outbound_number/:inbound_number", s.DurationTransfer)
 
