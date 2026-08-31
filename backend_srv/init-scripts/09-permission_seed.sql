@@ -1,14 +1,13 @@
 CREATE TABLE permissions (
-    id PRIMARY KEY SERIAL,
+    id SERIAL PRIMARY KEY,
     "name" VARCHAR(50) UNIQUE, -- 'procurement:create' ; 'procurement:delete'; 'procurement:approve' 
     "resource" VARCHAR(90), -- procurement
     "action" VARCHAR(90), -- create
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    created_by BIGINT, -- from user_id
+    created_by BIGINT -- from user_id
 );
 
 CREATE TABLE role_permissions (
-    id PRIMARY KEY SERIAL,
     role_id bigint,
     permission_id bigint
 );

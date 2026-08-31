@@ -1,17 +1,16 @@
 
 CREATE TABLE roles (
-    id PRIMARY KEY SERIAL,
+    id SERIAL PRIMARY KEY ,
     rolename VARCHAR(50) UNIQUE,
     "description" VARCHAR(90),
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
 -- 
 
 CREATE TABLE user_roles (
-    id primary key,
-    user_id bigint
-    role_id bigint,
+    user_id bigint,
+    role_id bigint
 );
 
 CREATE INDEX idx_userroles
