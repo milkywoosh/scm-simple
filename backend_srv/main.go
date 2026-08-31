@@ -56,7 +56,7 @@ func runRestAPIServer(
 	taskDistributor any, // worker.TaskDistributor
 ) {
 
-	newMaker, err := token.NewJWTMaker("7c2f6152b065929f57da4df44bc704d8")
+	newMaker, err := token.NewJWTMaker(config.TokenSymmetricKey)
 	if err != nil {
 		log.Fatalf("err info token maker: %s", err.Error())
 	}
