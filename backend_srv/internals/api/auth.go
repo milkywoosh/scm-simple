@@ -27,19 +27,25 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 	defer r.Body.Close()
 	errDecode := json.NewDecoder(r.Body).Decode(&req)
 	if errDecode != nil {
-		internals.WriteErrorResponse(w, http.StatusConflict, errDecode.Error())
+		errInfo := make(map[string]any)
+		errInfo["message"] = errDecode.Error()
+		internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
 		return
 	}
 
 	userInfo, err := s.service.GetInfoUser(r.Context(), req.Username)
 	if err != nil {
-		internals.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+		errInfo := make(map[string]any)
+		errInfo["message"] = errDecode.Error()
+		internals.WriteErrorResponse(w, http.StatusInternalServerError, errInfo)
 		return
 	}
 
 	err = utils.ComparePassword(userInfo.HashedPassword.String, req.Password)
 	if err != nil {
-		internals.WriteErrorResponse(w, http.StatusNotFound, err.Error())
+		errInfo := make(map[string]any)
+		errInfo["message"] = err.Error()
+		internals.WriteErrorResponse(w, http.StatusNotFound, errInfo)
 		return
 	}
 	// w.WriteHeader(http.StatusAccepted)
@@ -47,10 +53,12 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 
 	log.Printf("info username: %s", userInfo.Username.String)
 	log.Printf("s.config.AccessTokenDuration: %s", s.config.AccessTokenDuration)
-	
+
 	accessToken, payload, err := s.token.CreateToken(userInfo.Username.String, "admin", s.config.AccessTokenDuration)
 	if err != nil {
-		internals.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+		errInfo := make(map[string]any)
+		errInfo["message"] = err.Error()
+		internals.WriteErrorResponse(w, http.StatusInternalServerError, errInfo)
 		return
 	}
 
@@ -80,13 +88,17 @@ func (s *Server) UserRegistration(w http.ResponseWriter, r *http.Request, _ http
 
 	err := json.NewDecoder(r.Body).Decode(&registration)
 	if err != nil {
-		internals.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		errInfo := make(map[string]any)
+		errInfo["message"] = err.Error()
+		internals.WriteErrorResponse(w, http.StatusBadRequest, errInfo)
 		return
 	}
 
 	hashedPW, err := utils.HashPassword(registration.Password)
 	if err != nil {
-		internals.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+		errInfo := make(map[string]any)
+		errInfo["message"] = err.Error()
+		internals.WriteErrorResponse(w, http.StatusInternalServerError, errInfo)
 		return
 	}
 
@@ -112,7 +124,9 @@ func (s *Server) UserRegistration(w http.ResponseWriter, r *http.Request, _ http
 	// ctx context.Context, username string, password string, fullName string, email string, locationCode string
 	err = s.service.UserRegistrationTx(r.Context(), registration.Username, hashedPW, registration.Fullname, registration.Email, nil)
 	if err != nil {
-		internals.WriteErrorResponse(w, http.StatusExpectationFailed, err.Error())
+		errInfo := make(map[string]any)
+		errInfo["message"] = err.Error()
+		internals.WriteErrorResponse(w, http.StatusExpectationFailed, errInfo)
 		return
 	}
 	var responseData map[string]any = make(map[string]any)
@@ -130,11 +144,15 @@ func (s *Server) VerifyEmailSecretCode(w http.ResponseWriter, r *http.Request, p
 	secret_code := r.URL.Query().Get("secret_code") // query param
 
 	if email == "" {
-		internals.WriteErrorResponse(w, http.StatusBadRequest, "param email tidak lengkap")
+		errInfo := make(map[string]any)
+		errInfo["message"] = "param email tidak lengkap"
+		internals.WriteErrorResponse(w, http.StatusBadRequest, errInfo)
 		return
 	}
 	if secret_code == "" {
-		internals.WriteErrorResponse(w, http.StatusBadRequest, "param secret_code tidak lengkap")
+		errInfo := make(map[string]any)
+		errInfo["message"] = "param secret_code tidak lengkap"
+		internals.WriteErrorResponse(w, http.StatusBadRequest, errInfo)
 		return
 	}
 

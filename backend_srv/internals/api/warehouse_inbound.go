@@ -76,8 +76,9 @@ func (s *Server) DurationTransfer(w http.ResponseWriter, req *http.Request, path
 	DurationInfo, err := s.service.InfoTransferDuration(ctx, outbound_number, inbound_number)
 	if err != nil {
 		log.Println(err)
-
-		internals.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		errInfo := make(map[string]any)
+		errInfo["message"] = err.Error()
+		internals.WriteErrorResponse(w, http.StatusBadRequest, errInfo)
 		return
 	}
 
@@ -122,7 +123,9 @@ func (s *Server) InputItemWarehouseInbound(w http.ResponseWriter, req *http.Requ
 
 	err := s.service.WarehouseService.AllocateInboundItem(ctx, TransactionNumber, ReqBody.Identifier)
 	if err != nil {
-		internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+		errInfo := make(map[string]any)
+		errInfo["message"] = err.Error()
+		internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
 		return
 	}
 
@@ -148,7 +151,9 @@ func (s *Server) ListItemsReceived(w http.ResponseWriter, req *http.Request, pat
 
 	listItems, err := s.service.WarehouseService.ListItemsReceived(ctx, TransactionNumber)
 	if err != nil {
-		internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+		errInfo := make(map[string]any)
+		errInfo["message"] = err.Error()
+		internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
 		return
 	}
 
@@ -178,7 +183,9 @@ func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Re
 	if SetStatus == "submit" {
 		err := s.service.WarehouseService.SetSubmit(ctx, TransactionNumber)
 		if err != nil {
-			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			errInfo := make(map[string]any)
+			errInfo["message"] = err.Error()
+			internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
 			return
 		}
 
@@ -192,7 +199,9 @@ func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Re
 
 		err := s.service.WarehouseService.SetCancelInbound(ctx, TransactionNumber)
 		if err != nil {
-			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			errInfo := make(map[string]any)
+			errInfo["message"] = err.Error()
+			internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
 			return
 		}
 
@@ -205,7 +214,9 @@ func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Re
 	} else if SetStatus == "reject" {
 		err := s.service.WarehouseService.SetReject(ctx, TransactionNumber)
 		if err != nil {
-			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			errInfo := make(map[string]any)
+			errInfo["message"] = err.Error()
+			internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
 			return
 		}
 
@@ -219,7 +230,9 @@ func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Re
 	} else if SetStatus == "approve" {
 		err := s.service.WarehouseService.SetApproveInbound(ctx, TransactionNumber)
 		if err != nil {
-			internals.WriteErrorResponse(w, http.StatusConflict, err.Error())
+			errInfo := make(map[string]any)
+			errInfo["message"] = err.Error()
+			internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
 			return
 		}
 
@@ -230,7 +243,9 @@ func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Re
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
 		return
 	} else {
-		internals.WriteErrorResponse(w, http.StatusBadRequest, "Proses ini tidak dapat dilakukan. Request tersedia hanya ada (submit, cancel, reject, approve)")
+		errInfo := make(map[string]any)
+		errInfo["message"] = "Proses ini tidak dapat dilakukan. Request tersedia hanya ada (submit, cancel, reject, approve)"
+		internals.WriteErrorResponse(w, http.StatusBadRequest, errInfo)
 		return
 
 	}
