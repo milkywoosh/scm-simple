@@ -6,6 +6,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"scm-simple-luke.com/dir/internals"
+	"scm-simple-luke.com/dir/internals/token"
 )
 
 type CalTestInitResponse struct {
@@ -36,7 +37,17 @@ func CallTestInit(w http.ResponseWriter, req *http.Request, pathParam httprouter
 
 	transactionId := pathParam.ByName("transaction_id")
 
+	// note : result of payload must be infered to expected type
+	payload, ok := req.Context().Value(payloadKey).(*token.Payload)
+	if !ok {
+		errInfo := make(map[string]any)
+		errInfo["message"] = "Error, gagal mendapat payload"
+		internals.WriteErrorResponse(w, http.StatusForbidden, errInfo)
+		return
+	}
+
 	responseData["message"] = "oke"
+	responseData["payload"] = payload
 	responseData["data"] = struct {
 		TransactionId  string
 		StatusApproval string
