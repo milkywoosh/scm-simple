@@ -9,11 +9,19 @@ import (
 	"time"
 )
 
-func WriteErrorResponse(w http.ResponseWriter, statusHttp int, messageErr string) {
+/*
+	Informational responses (100 – 199)
+	Successful responses (200 – 299)
+	Redirection messages (300 – 399)
+	Client error responses (400 – 499)
+	Server error responses (500 – 599)
+*/
+
+func WriteErrorResponse(w http.ResponseWriter, statusHttp int, errInfo map[string]any) {
 
 	var b bytes.Buffer
-	if err := json.NewEncoder(&b).Encode(messageErr); err != nil {
-		http.Error(w, "gagal encode info error", http.StatusInternalServerError)
+	if err := json.NewEncoder(&b).Encode(errInfo); err != nil {
+		http.Error(w, "gagal encode info error", http.StatusBadRequest)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -23,14 +31,8 @@ func WriteErrorResponse(w http.ResponseWriter, statusHttp int, messageErr string
 
 func WriteResponse(w http.ResponseWriter, statusHttp int, data map[string]any) {
 
-	if statusHttp != 200 && statusHttp != 202 {
-
-		strData, ok := data["message"].(string)
-		if !ok {
-			WriteErrorResponse(w, http.StatusInternalServerError, "gagal parsing info error")
-			return
-		}
-		WriteErrorResponse(w, statusHttp, strData)
+	if statusHttp < 200 && statusHttp > 299 {
+		WriteErrorResponse(w, statusHttp, data)
 		return
 	}
 
