@@ -6,15 +6,52 @@ CREATE TABLE roles (
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- 
+INSERT INTO roles (
+    rolename,
+    "description"
+) VALUES 
+    (
+        'warehouse_manager', 'manager of warehouse'
+    ),
+    (
+        'warehouse_spv', 'supervisor of warehouse'
+    ),
+    (
+        'warehouse_staff', 'staff of warehouse'
+    );
+
+INSERT INTO roles (
+    rolename,
+    "description"
+) VALUES 
+    (
+        'technician', 'person who is incharge for installation, dismantling, deployment'
+    );
+    
 
 CREATE TABLE user_roles (
     user_id bigint,
     role_id bigint
 );
 
+INSERT INTO user_roles (user_id, role_id)
+    SELECT u.id, r.id FROM users u, roles r
+        WHERE u.username = 'ben01' AND r.rolename = 'warehouse_staff'
+    UNION ALL
+    SELECT u.id, r.id FROM users u, roles r
+        WHERE u.username = 'ron01' AND r.rolename = 'warehouse_manager';
+
+INSERT INTO user_roles (user_id, role_id)
+    SELECT u.id, r.id FROM users u, roles r
+        WHERE u.username = 'don01' AND r.rolename = 'technician'
+    
 CREATE INDEX idx_userroles
     ON user_roles (user_id, role_id);
+
+-- on
+ALTER TABLE user_roles 
+ADD CONSTRAINT unique_user_roles_fields UNIQUE (user_id, role_id);
+
 
 -- foreign key to [username, role]
 ALTER TABLE user_roles
