@@ -19,3 +19,6 @@ VALUES('ben01', NULL, 'ben one', 'ben@gmail.com', now(), now());
 
 INSERT INTO users (username, hashed_password, full_name, email, password_changed_at, created_at) 
 VALUES('ron01', NULL, 'ron one', 'ron@gmail.com', now(), now());
+
+INSERT INTO users (username, hashed_password, full_name, email, password_changed_at, created_at) 
+VALUES('don01', NULL, 'don tech', 'don@gmail.com', now(), now());
