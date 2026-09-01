@@ -1,5 +1,12 @@
 
-CREATE TYPE type_of_trans AS ENUM ('warehouse_to_warehouse', 'warehouse_to_technician', 'technician_to_warehouse', 'procurement', 'installation', 'deployment');
+CREATE TYPE type_of_trans AS ENUM (
+    'warehouse_to_warehouse', 
+    'warehouse_to_technician', 
+    'technician_to_warehouse', 
+    'procurement', 
+    'installation', 
+    'deployment'
+);
 
 CREATE TABLE transaction_item_transfers (
     id serial primary key ,
