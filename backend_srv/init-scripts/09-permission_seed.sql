@@ -1,6 +1,6 @@
 CREATE TABLE permissions (
     id SERIAL PRIMARY KEY,
-    "name" VARCHAR(50) UNIQUE, -- etc 'procurement:create' ; 'procurement:delete'; 'procurement:approve' 
+    "permission_act" VARCHAR(50) UNIQUE, -- etc 'procurement:create' ; 'procurement:delete'; 'procurement:approve' 
     "resource" type_of_trans, -- procurement **defined type at transaction_seed.sql
     "action" VARCHAR(90), -- create
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE permissions (
 ALTER TYPE type_of_trans ADD VALUE 'user_administration';
 
 INSERT INTO permissions (
-    "name", "resource", "action", created_by
+    "permission_act", "resource", "action", created_by
 ) VALUES 
     (
         'warehouse_to_warehouse:create',
@@ -44,6 +44,23 @@ INSERT INTO permissions (
         999 -- for admin user 
     );
 
+-- ok
+INSERT INTO permissions (
+    "permission_act", "resource", "action", created_by
+) VALUES 
+    (
+        'warehouse_to_technician:cancel',
+        'warehouse_to_technician',
+        'cancel',
+        999 --  id admin user 
+    ),
+    (
+        'warehouse_to_technician:approve',
+        'warehouse_to_technician',
+        'approve',
+        999 --  id admin user 
+    );
+
 CREATE TABLE role_permissions (
     role_id bigint,
     permission_id bigint,
@@ -71,10 +88,10 @@ INSERT INTO role_permissions (
     permission_id,
     created_by
 ) SELECT r.id, p.id, 999 FROM roles r, permissions p 
-    WHERE r.rolename = 'warehouse_manager' AND p."name" = 'warehouse_to_warehouse:cancel'
+    WHERE r.rolename = 'warehouse_manager' AND p."permission_act" = 'warehouse_to_warehouse:cancel'
   UNION ALL
   SELECT r.id, p.id, 999 FROM roles r, permissions p 
-    WHERE r.rolename = 'warehouse_manager' AND p."name" = 'warehouse_to_warehouse:approve';
+    WHERE r.rolename = 'warehouse_manager' AND p."permission_act" = 'warehouse_to_warehouse:approve';
 
 -- ok
 INSERT INTO role_permissions (
@@ -82,12 +99,21 @@ INSERT INTO role_permissions (
     permission_id,
     created_by
 ) SELECT r.id, p.id, 999 FROM roles r, permissions p 
-    WHERE r.rolename = 'warehouse_staff' AND p."name" = 'warehouse_to_warehouse:create'
+    WHERE r.rolename = 'warehouse_staff' AND p."permission_act" = 'warehouse_to_warehouse:create'
   UNION ALL
   SELECT r.id, p.id, 999 FROM roles r, permissions p 
-    WHERE r.rolename = 'warehouse_staff' AND p."name" = 'warehouse_to_warehouse:submit'
+    WHERE r.rolename = 'warehouse_staff' AND p."permission_act" = 'warehouse_to_warehouse:submit'
   UNION ALL
   SELECT r.id, p.id, 999 FROM roles r, permissions p 
-    WHERE r.rolename = 'warehouse_staff' AND p."name" = 'warehouse_to_warehouse:reject';
+    WHERE r.rolename = 'warehouse_staff' AND p."permission_act" = 'warehouse_to_warehouse:reject';
 
--- 
+-- assign role permissions for tech
+INSERT INTO role_permissions (
+    role_id,
+    permission_id,
+    created_by
+) SELECT r.id, p.id, 999 FROM roles r, permissions p 
+    WHERE r.rolename = 'technician' AND p."permission_act" = 'warehouse_to_technician:cancel'
+  UNION ALL
+  SELECT r.id, p.id, 999 FROM roles r, permissions p 
+    WHERE r.rolename = 'technician' AND p."permission_act" = 'warehouse_to_technician:approve';
