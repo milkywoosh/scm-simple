@@ -50,7 +50,6 @@ func (s *Server) CreateDraftWarehouseInbound(w http.ResponseWriter, req *http.Re
 	DataResp["message"] = "create draft inbound berhasil"
 	DataResp["data"] = NewDraft
 	internals.WriteResponse(w, http.StatusAccepted, DataResp)
-	return
 
 }
 
@@ -131,7 +130,7 @@ func (s *Server) InputItemWarehouseInbound(w http.ResponseWriter, req *http.Requ
 
 	DataResp["message"] = "return okay"
 	internals.WriteResponse(w, http.StatusAccepted, DataResp)
-	return
+
 }
 
 // ListItemsReceived godoc
@@ -180,7 +179,8 @@ func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Re
 	TransactionNumber := pathParam.ByName("transaction_number")
 	SetStatus := pathParam.ByName("status")
 
-	if SetStatus == "submit" {
+	switch SetStatus {
+	case "submit":
 		err := s.service.WarehouseService.SetSubmit(ctx, TransactionNumber)
 		if err != nil {
 			errInfo := make(map[string]any)
@@ -194,9 +194,7 @@ func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Re
 		RespData["transaction_number"] = TransactionNumber
 
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
-		return
-	} else if SetStatus == "cancel" {
-
+	case "cancel":
 		err := s.service.WarehouseService.SetCancelInbound(ctx, TransactionNumber)
 		if err != nil {
 			errInfo := make(map[string]any)
@@ -210,8 +208,8 @@ func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Re
 		RespData["transaction_number"] = TransactionNumber
 
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
-		return
-	} else if SetStatus == "reject" {
+
+	case "reject":
 		err := s.service.WarehouseService.SetReject(ctx, TransactionNumber)
 		if err != nil {
 			errInfo := make(map[string]any)
@@ -225,9 +223,7 @@ func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Re
 		RespData["transaction_number"] = TransactionNumber
 
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
-		return
-
-	} else if SetStatus == "approve" {
+	case "approve":
 		err := s.service.WarehouseService.SetApproveInbound(ctx, TransactionNumber)
 		if err != nil {
 			errInfo := make(map[string]any)
@@ -241,13 +237,13 @@ func (s *Server) SetStatusInboundTransaction(w http.ResponseWriter, req *http.Re
 		RespData["transaction_number"] = TransactionNumber
 
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
-		return
-	} else {
+
+	default:
 		errInfo := make(map[string]any)
 		errInfo["message"] = "Proses ini tidak dapat dilakukan. Request tersedia hanya ada (submit, cancel, reject, approve)"
 		internals.WriteErrorResponse(w, http.StatusBadRequest, errInfo)
-		return
 
 	}
+
 
 }

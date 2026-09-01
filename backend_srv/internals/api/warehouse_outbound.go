@@ -88,7 +88,6 @@ func (s *Server) CreateDraftWarehouseOutbound(w http.ResponseWriter, req *http.R
 	DataResp["message"] = "create draft berhasil"
 	DataResp["data"] = NewDraft
 	internals.WriteResponse(w, http.StatusAccepted, DataResp)
-	return
 
 }
 
@@ -134,7 +133,6 @@ func (s *Server) InputItemWarehouseTransfer(w http.ResponseWriter, req *http.Req
 
 	DataResp["message"] = "return okay"
 	internals.WriteResponse(w, http.StatusAccepted, DataResp)
-	return
 }
 
 type DisallocateItemWarehouseTransferParams struct {
@@ -179,7 +177,6 @@ func (s *Server) DisallocateItemWarehouseTransfer(w http.ResponseWriter, req *ht
 
 	DataResp["message"] = "return okay"
 	internals.WriteResponse(w, http.StatusAccepted, DataResp)
-	return
 }
 
 // SetStatusTransaction godoc
@@ -198,8 +195,8 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 	ctx := req.Context()
 	TransactionNumber := pathParam.ByName("transaction_number")
 	SetStatus := pathParam.ByName("status")
-
-	if SetStatus == "submit" {
+	switch SetStatus {
+	case "submit":
 		err := s.service.WarehouseService.SetSubmit(ctx, TransactionNumber)
 		if err != nil {
 			errInfo := make(map[string]any)
@@ -213,9 +210,8 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 		RespData["transaction_number"] = TransactionNumber
 
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
-		return
-	} else if SetStatus == "cancel" {
-
+		
+	case "cancel":
 		err := s.service.WarehouseService.SetCancel(ctx, TransactionNumber)
 		if err != nil {
 			errInfo := make(map[string]any)
@@ -229,8 +225,8 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 		RespData["transaction_number"] = TransactionNumber
 
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
-		return
-	} else if SetStatus == "reject" {
+		
+	case "reject":
 		err := s.service.WarehouseService.SetReject(ctx, TransactionNumber)
 		if err != nil {
 			errInfo := make(map[string]any)
@@ -244,9 +240,8 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 		RespData["transaction_number"] = TransactionNumber
 
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
-		return
-
-	} else if SetStatus == "approve" {
+		
+	case "approve":
 		err := s.service.WarehouseService.SetApproveOutbound(ctx, TransactionNumber)
 		if err != nil {
 			errInfo := make(map[string]any)
@@ -260,14 +255,82 @@ func (s *Server) SetStatusTransaction(w http.ResponseWriter, req *http.Request, 
 		RespData["transaction_number"] = TransactionNumber
 
 		internals.WriteResponse(w, http.StatusAccepted, RespData)
-		return
-	} else {
+	default:
 		errInfo := make(map[string]any)
 		errInfo["message"] = "Proses ini tidak dapat dilakukan. Request tersedia hanya ada (submit, cancel, reject, approve)"
 		internals.WriteErrorResponse(w, http.StatusBadRequest, errInfo)
-		return
-
+		
 	}
+
+	// if SetStatus == "submit" {
+	// 	err := s.service.WarehouseService.SetSubmit(ctx, TransactionNumber)
+	// 	if err != nil {
+	// 		errInfo := make(map[string]any)
+	// 		errInfo["message"] = err.Error()
+	// 		internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
+	// 		return
+	// 	}
+
+	// 	RespData := make(map[string]any)
+	// 	RespData["message"] = "update status berhasil"
+	// 	RespData["transaction_number"] = TransactionNumber
+
+	// 	internals.WriteResponse(w, http.StatusAccepted, RespData)
+	// 	return
+	// } else if SetStatus == "cancel" {
+
+	// 	err := s.service.WarehouseService.SetCancel(ctx, TransactionNumber)
+	// 	if err != nil {
+	// 		errInfo := make(map[string]any)
+	// 		errInfo["message"] = err.Error()
+	// 		internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
+	// 		return
+	// 	}
+
+	// 	RespData := make(map[string]any)
+	// 	RespData["message"] = "update status berhasil"
+	// 	RespData["transaction_number"] = TransactionNumber
+
+	// 	internals.WriteResponse(w, http.StatusAccepted, RespData)
+	// 	return
+	// } else if SetStatus == "reject" {
+	// 	err := s.service.WarehouseService.SetReject(ctx, TransactionNumber)
+	// 	if err != nil {
+	// 		errInfo := make(map[string]any)
+	// 		errInfo["message"] = err.Error()
+	// 		internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
+	// 		return
+	// 	}
+
+	// 	RespData := make(map[string]any)
+	// 	RespData["message"] = "update status berhasil"
+	// 	RespData["transaction_number"] = TransactionNumber
+
+	// 	internals.WriteResponse(w, http.StatusAccepted, RespData)
+	// 	return
+
+	// } else if SetStatus == "approve" {
+	// 	err := s.service.WarehouseService.SetApproveOutbound(ctx, TransactionNumber)
+	// 	if err != nil {
+	// 		errInfo := make(map[string]any)
+	// 		errInfo["message"] = err.Error()
+	// 		internals.WriteErrorResponse(w, http.StatusConflict, errInfo)
+	// 		return
+	// 	}
+
+	// 	RespData := make(map[string]any)
+	// 	RespData["message"] = "update status berhasil"
+	// 	RespData["transaction_number"] = TransactionNumber
+
+	// 	internals.WriteResponse(w, http.StatusAccepted, RespData)
+	// 	return
+	// } else {
+	// 	errInfo := make(map[string]any)
+	// 	errInfo["message"] = "Proses ini tidak dapat dilakukan. Request tersedia hanya ada (submit, cancel, reject, approve)"
+	// 	internals.WriteErrorResponse(w, http.StatusBadRequest, errInfo)
+	// 	return
+
+	// }
 
 }
 

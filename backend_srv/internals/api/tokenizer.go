@@ -94,5 +94,5 @@ func (server *Server) renewAccessToken(w http.ResponseWriter, req *http.Request)
 	DataResp["message"] = "renewal token berhasil"
 	DataResp["data"] = rsp
 	internals.WriteResponse(w, http.StatusAccepted, DataResp)
-	return
+	
 }

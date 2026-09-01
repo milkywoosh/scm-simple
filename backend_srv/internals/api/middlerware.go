@@ -21,6 +21,7 @@ type ctxKey string
 
 const payloadKey ctxKey = "payload"
 
+/*
 func authMiddlewareV1(next http.Handler) http.HandlerFunc {
 	// return ServeHttp(http.ResponseWriter, *http.Request) SIGNATURE
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -30,6 +31,7 @@ func authMiddlewareV1(next http.Handler) http.HandlerFunc {
 		next.ServeHTTP(w, r)
 	}
 }
+*/
 
 // only for httprouter
 func authMiddlewareV2(tokenMaker token.TokenMaker, next httprouter.Handle) httprouter.Handle {
@@ -73,21 +75,28 @@ func authMiddlewareV2(tokenMaker token.TokenMaker, next httprouter.Handle) httpr
 	}
 }
 
+/*
+
 func level1(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, path httprouter.Params) {
 
-		log.Printf("pass auth to <level1> : %s", r.Header.Get("pass1"))
+	log.Printf("pass auth to <level1> : %s", r.Header.Get("pass1"))
 
-		next(w, r, path)
-	}
+	next(w, r, path)
 }
+}
+*/
+
+
+/*
 
 func (s *Server) roleValidationMiddleware(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, path httprouter.Params) {
-
-		log.Printf("roleValidationMiddleware : %s", r.Header.Get(authorizationPayloadKey))
-
-		s.service.AuthenticationService.
-		next(w, r, path)
-	}
+		
+	log.Printf("roleValidationMiddleware : %s", r.Header.Get(authorizationPayloadKey))
+	
+	// s.service.AuthenticationService.
+	// next(w, r, path)
 }
+}
+*/

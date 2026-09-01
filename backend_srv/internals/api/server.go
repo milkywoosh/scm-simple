@@ -138,7 +138,7 @@ func (s *Server) userRoutes() {
 	// s.route.POST("/api/user/v1/verify-secret-code", s.VerifyEmailSecretCode)
 }
 
-func (s *Server) stockTransferRoutes() {}
+// func (s *Server) stockTransferRoutes() {}
 
 func (s *Server) Start(addr string) error {
 	return s.srvInit.ListenAndServe()
