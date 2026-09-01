@@ -15,6 +15,10 @@ CREATE TABLE users (
 CREATE INDEX idx_users_username_email
     ON users (username, email);
 
+-- SUPER ADMIN 
+INSERT INTO users (id, username, hashed_password, full_name, email, password_changed_at, created_at) 
+VALUES(999, 'super_admin', NULL, 'super admin', 'superadmin@gmail.com', now(), now());
+
 INSERT INTO users (username, hashed_password, full_name, email, password_changed_at, created_at) 
 VALUES('ben01', NULL, 'ben one', 'ben@gmail.com', now(), now());
 
