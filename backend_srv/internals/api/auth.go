@@ -36,7 +36,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request, _ httprouter.Para
 	userInfo, err := s.service.GetInfoUser(r.Context(), req.Username)
 	if err != nil {
 		errInfo := make(map[string]any)
-		errInfo["message"] = errDecode.Error()
+		errInfo["message"] = err.Error()
 		internals.WriteErrorResponse(w, http.StatusInternalServerError, errInfo)
 		return
 	}
