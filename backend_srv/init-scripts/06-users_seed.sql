@@ -9,7 +9,7 @@ CREATE TABLE users (
     email varchar(90) UNIQUE,
     password_changed_at TIMESTAMPTZ default null,
     created_at TIMESTAMPTZ,
-    
+    created_by BIGINT
 );
 
 CREATE INDEX idx_users_username_email
