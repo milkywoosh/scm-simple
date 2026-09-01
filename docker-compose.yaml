@@ -6,7 +6,7 @@ services:
     container_name: go-app
     restart: unless-stopped
     env_file:
-      - .env
+      - app.env
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -31,7 +31,7 @@ services:
       - "127.0.0.1:5432:5432" #accesible via dbeaver SSH
     restart: unless-stopped
     env_file:
-      - .env
+      - app.env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
