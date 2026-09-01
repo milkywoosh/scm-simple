@@ -12,6 +12,10 @@ CREATE TABLE role_permissions (
     permission_id bigint
 );
 
+-- on
+ALTER TABLE role_permissions 
+ADD CONSTRAINT unique_role_permissions_fields UNIQUE (role_id, permission_id);
+
 ALTER TABLE role_permissions
     ADD CONSTRAINT fk_roles_on_rolepermissions
         FOREIGN KEY (role_id)
