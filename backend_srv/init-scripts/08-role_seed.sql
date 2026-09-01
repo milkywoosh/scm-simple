@@ -31,7 +31,8 @@ INSERT INTO roles (
 
 CREATE TABLE user_roles (
     user_id bigint,
-    role_id bigint
+    role_id bigint,
+    created_at timestamptz default now(),
 );
 
 INSERT INTO user_roles (user_id, role_id)
@@ -41,6 +42,7 @@ INSERT INTO user_roles (user_id, role_id)
     SELECT u.id, r.id FROM users u, roles r
         WHERE u.username = 'ron01' AND r.rolename = 'warehouse_manager';
 
+-- assign sample user for technician
 INSERT INTO user_roles (user_id, role_id)
     SELECT u.id, r.id FROM users u, roles r
         WHERE u.username = 'don01' AND r.rolename = 'technician'
