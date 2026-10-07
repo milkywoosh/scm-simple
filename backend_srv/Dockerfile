@@ -9,7 +9,7 @@ RUN apt-get update \
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY go.mod go.sum /app
 RUN go mod download
 
 COPY . .
@@ -26,11 +26,12 @@ FROM alpine:3.19
 RUN apk add --no-cache ca-certificates tzdata
 
 # Create non-root user
-RUN addgroup -S app && adduser -S app -G app
+RUN addgroup -S app 
+RUN adduser -S app -G app
 
 WORKDIR /app
 
-COPY --from=builder /app/server .
+COPY --from=builder /app/server /app
 
 # Ensure non-root user owns the binary (if needed) and switch user
 USER app
