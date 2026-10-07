@@ -26,10 +26,30 @@ type Config struct {
 
 func LoadConfig(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
+	viper.SetConfigFile("app.env")
 
 	viper.AutomaticEnv()
+
+	var keys = []string{"ENVIRONMENT",
+		"ALLOWED_ORIGINS",
+		"PG_CONNSTRING",
+		"MIGRATION_URL",
+		"REDIS_ADDRESS",
+		"HTTP_SERVER_ADDRESS",
+		"GRPC_SERVER_ADDRESS",
+		"TOKEN_SYMMETRIC_KEY",
+		"ACCESS_TOKEN_DURATION_INMINUTE",
+		"REFRESH_TOKEN_DURATION",
+		"EMAIL_SENDER_NAME",
+		"EMAIL_SENDER_ADDRESS",
+		"EMAIL_SENDER_PASSWORD",
+		"PORT",
+		"ADDR",
+	}
+
+	for _, key := range keys {
+		viper.BindEnv(key)
+	}
 
 	err = viper.ReadInConfig()
 	if err != nil {
