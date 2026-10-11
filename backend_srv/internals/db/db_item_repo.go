@@ -20,6 +20,51 @@ func NewDBItemRepository(db DBTX) domain.ItemRepository {
 	}
 }
 
+func (d *DBItemRepository) UploadNewItem(ctx context.Context, row domain.ItemInfo) error {
+
+	query := `
+		INSERT INTO items (
+			serial_number,
+			factory_serial_number,
+			curr_status,
+			curr_location_code,
+			product_code,
+			introduction_number,
+			curr_transaction,
+			created_at
+			) VALUES
+		(
+			$1,
+			$2,
+			$3,
+			$4,
+			$5,
+			$6,
+			null,
+			CURRENT_TIMESTAMP,
+		)
+	`
+	// note :  pgx.Pool aman utk concurrency
+	// intinya 1 pgx.Pool untuk 1 worker
+	// how about pgx.Conn ???? TIDAK AMAN
+	d.Conn.QueryRow(
+		ctx,
+		query,
+		row.Serial_number,
+		row.Factory_serial_number,
+		row.Curr_status,
+		row.Curr_location_code,
+		row.Product_code,
+		row.Introduction_number,
+	)
+	return nil
+}
+
+// need job worker concurrent
+func (d *DBItemRepository) UploadBulkNewItems(ctx context.Context, batch_size int, rows []domain.ItemInfo) error {
+	return nil
+}
+
 func (d *DBItemRepository) GetItem(ctx context.Context, identifier string) ([]domain.ItemInfo, error) {
 
 	query := `
@@ -365,7 +410,6 @@ func (d *DBItemRepository) DisAllocateItem(ctx context.Context, transaction_numb
 		log.Printf("err delete from item_histories disallocate: %v", err)
 		return err
 	}
-
 
 	TransInfo, err := d.CheckTransaction(ctx, transaction_number)
 	if err != nil {

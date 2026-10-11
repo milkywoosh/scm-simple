@@ -25,10 +25,14 @@ func newPgQuery(db *pgxpool.Pool) *pgQuery {
 	}
 }
 
-func (ot *pgQuery) AuthRepo() domain.UserRepository {
+func (ot *pgQuery) AuthPool() domain.UserRepository {
 	return ot.userRepo
 }
 
-func (ot *pgQuery) WarehouseRepo() domain.LocationRepository {
+func (ot *pgQuery) WarehousePool() domain.LocationRepository {
 	return ot.locationRepo
+}
+
+func (ot *pgQuery) ItemPool() domain.ItemRepository {
+	return ot.itemRepo
 }
