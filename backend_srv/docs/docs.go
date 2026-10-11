@@ -22,6 +22,50 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/test-init/{transaction_id}": {
+            "get": {
+                "description": "Call Test Init after construct code for swagger init",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "callany"
+                ],
+                "summary": "Test init for swagger docs",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Transaction Id",
+                        "name": "transaction_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.CalTestInitResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/warehouse/inbound/create-draft": {
             "post": {
                 "description": "Warehouse inbound receiving all incoming items from warehouse origin",
@@ -508,95 +552,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/test-init/{transaction_id}": {
-            "get": {
-                "description": "Call Test Init after construct code for swagger init",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "callany"
-                ],
-                "summary": "Test init for swagger docs",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Transaction Id",
-                        "name": "transaction_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/api.CalTestInitResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/warehouse/:location_code": {
-            "get": {
-                "description": "Search location by location code, customer, technician, warehouse",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "location warehouse customer technician"
-                ],
-                "summary": "Search location by location code",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "format": "email",
-                        "description": "name search by q",
-                        "name": "q",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Location code",
-                        "name": "location_code",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -625,12 +580,6 @@ const docTemplate = `{
         "api.CreateDraftWarehouseInboundParams": {
             "type": "object",
             "properties": {
-                "location_destination": {
-                    "type": "string"
-                },
-                "location_origin": {
-                    "type": "string"
-                },
                 "outbound_number": {
                     "type": "string"
                 }
