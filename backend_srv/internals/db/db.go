@@ -66,6 +66,15 @@ func (or *PgDBInstance) beginTx(ctx context.Context) (*pgTransaction, error) {
 	tx, err := or.db.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.ReadCommitted, AccessMode: pgx.ReadWrite})
 
 	return newPgTx(tx), err
+}
+
+// implement Queries Interface
+func (or *PgDBInstance) BeginUpload(ctx context.Context) (domain.ItemRepository, error) {
+	q, err := or.beginQuery()
+	if err != nil {
+		return nil, err
+	}
+	return q.ItemPool(), err
 
 }
 
@@ -115,7 +124,7 @@ func (or *PgDBInstance) AuthQueries(ctx context.Context) (domain.UserRepository,
 		return nil, err
 	}
 
-	return pgQuery.AuthRepo(), nil
+	return pgQuery.AuthPool(), nil
 }
 func (or *PgDBInstance) WarehouseQueries(ctx context.Context) (domain.LocationRepository, error) {
 	pgQuery, err := or.beginQuery()
@@ -123,7 +132,7 @@ func (or *PgDBInstance) WarehouseQueries(ctx context.Context) (domain.LocationRe
 		return nil, err
 	}
 
-	return pgQuery.WarehouseRepo(), nil
+	return pgQuery.WarehousePool(), nil
 }
 
 func (or *PgDBInstance) ItemQueries(ctx context.Context) (domain.ItemRepository, error) {

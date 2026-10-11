@@ -7,4 +7,5 @@ type Queries interface {
 	AuthQueries(ctx context.Context) (UserRepository, error)
 	WarehouseQueries(ctx context.Context) (LocationRepository, error)
 	ItemQueries(ctx context.Context) (ItemRepository, error)
+	BeginUpload(ctx context.Context) (ItemRepository, error)
 }

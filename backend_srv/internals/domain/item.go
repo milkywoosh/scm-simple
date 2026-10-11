@@ -28,6 +28,8 @@ type ItemRepository interface {
 
 	ReceiveInboundItem(ctx context.Context, transaction_number, identifier string) error
 	CheckTransaction(ctx context.Context, transaction_number string) (TransactionInfo, error)
+	UploadNewItem(ctx context.Context, row ItemInfo) error
+	UploadBulkNewItems(ctx context.Context, batch_size int, rows []ItemInfo) error
 }
 
 type WarehouseOutboundInfo struct {
