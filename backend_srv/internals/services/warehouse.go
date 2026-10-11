@@ -51,9 +51,7 @@ func (a *WarehouseService) CreateDraftOutboundTx(ctx context.Context, location_o
 	log.Printf("errr CreateDraftOutboundTx 1 %v", err)
 
 	if err != nil {
-		if err != nil {
-			return n, err
-		}
+		return n, err
 	}
 	err = tx.Commit(ctx)
 	log.Printf("errr CreateDraftOutboundTx Commit %v", err)
@@ -475,9 +473,8 @@ func (a *WarehouseService) CreateDraftInboundTx(ctx context.Context, outbound_nu
 	new_transaction, err := tx.NewDraftInbound(ctx, transaction_number, outbound_number, "warehouse_to_warehouse")
 	if err != nil {
 		log.Printf("errr CreateDraftInboundTx 1 %v", err)
-		if err != nil {
-			return n, err
-		}
+		return n, err
+
 	}
 
 	err = tx.InputInboundTracker(ctx, transaction_number, outbound_number)
