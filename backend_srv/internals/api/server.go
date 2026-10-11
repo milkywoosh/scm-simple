@@ -27,7 +27,12 @@ type Server struct {
 
 type ErrorResponse string
 
-func NewServer(cfg utils.Config, services *services.Services, token token.TokenMaker, taskDistributor any) (*Server, error) {
+func NewServer(
+	cfg utils.Config, 
+	services *services.Services, 
+	token token.TokenMaker, 
+	taskDistributor any,
+) (*Server, error) {
 
 	// need token maker here JWT or Paseto
 
@@ -129,6 +134,8 @@ func (s *Server) warehouseRoutes() {
 	s.route.PUT("/api/v1/warehouse/inbound/set-status/:transaction_number/:status", s.SetStatusInboundTransaction)
 	s.route.POST("/api/v1/warehouse/inbound/input-item/:transaction_number", s.InputItemWarehouseInbound)
 	s.route.GET("/api/v1/warehouse/inbound/list-items/:transaction_number", s.ListItemsReceived)
+
+	s.route.POST("/api/v1/warehouse/upload/items", nil)
 
 }
 
