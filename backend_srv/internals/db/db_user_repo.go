@@ -67,7 +67,7 @@ func (d *DBUserRepository) GetUser(ctx context.Context, username string) (domain
 		&user.HashedPassword,
 		&user.CreatedAt,
 	); err != nil {
-		log.Printf("GetUser err 1: ", err.Error())
+		log.Printf("GetUser err 1: %s", err.Error())
 		if err == sql.ErrNoRows {
 			return domain.UserRow{}, err
 		}
