@@ -22,15 +22,23 @@ type Config struct {
 	EmailSenderPassword  string        `mapstructure:"EMAIL_SENDER_PASSWORD"`
 	Port                 string        `mapstructure:"PORT"`
 	Addr                 string        `mapstructure:"ADDR"`
+	RabbitMQDial         string        `mapstructure:"RABBITMQ_DIAL"`
+	RabbitMQUser         string        `mapstructure:"RABBITMQ_USER"`
+	RabbitMQPassword     string        `mapstructure:"RABBITMQ_PASSWORD"`
+	AccessKeyS3          string        `mapstructure:"ACCESS_KEY_S3"`
+	SecretKeyS3          string        `mapstructure:"SECRET_KEY_S3"`
+	AddressS3            string        `mapstructure:"ENDPOINT_S3"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
+	viper.SetConfigName("app")
+	viper.SetConfigType("env")
 	viper.AddConfigPath(path)
-	viper.SetConfigFile("app.env")
 
 	viper.AutomaticEnv()
 
-	var keys = []string{"ENVIRONMENT",
+	keys := []string{
+		"ENVIRONMENT",
 		"ALLOWED_ORIGINS",
 		"PG_CONNSTRING",
 		"MIGRATION_URL",
@@ -39,23 +47,37 @@ func LoadConfig(path string) (config Config, err error) {
 		"GRPC_SERVER_ADDRESS",
 		"TOKEN_SYMMETRIC_KEY",
 		"ACCESS_TOKEN_DURATION_INMINUTE",
-		"REFRESH_TOKEN_DURATION",
+		"REFRESH_TOKEN_DURATION_INMINUTE",
 		"EMAIL_SENDER_NAME",
 		"EMAIL_SENDER_ADDRESS",
 		"EMAIL_SENDER_PASSWORD",
 		"PORT",
 		"ADDR",
+		"RABBITMQ_DIAL",
+		"RABBITMQ_HOST",
+		"RABBITMQ_USER",
+		"RABBITMQ_PASSWORD",
+		"RABBITMQ_PORT",
+		"ACCESS_KEY_S3",
+		"SECRET_KEY_S3",
+		"ENDPOINT_S3",
 	}
 
 	for _, key := range keys {
-		viper.BindEnv(key)
+		if err := viper.BindEnv(key); err != nil {
+			return config, err
+		}
 	}
 
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return config, err
+		}
 	}
 
-	err = viper.Unmarshal(&config)
-	return
+	if err := viper.Unmarshal(&config); err != nil {
+		return config, err
+	}
+
+	return config, nil
 }
