@@ -11,7 +11,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"scm-simple-luke.com/dir/internals"
+	msgqueue "scm-simple-luke.com/dir/internals/msg_queue"
 	"scm-simple-luke.com/dir/internals/services"
+	"scm-simple-luke.com/dir/internals/storage"
 	"scm-simple-luke.com/dir/internals/token"
 	"scm-simple-luke.com/dir/internals/utils"
 )
@@ -22,15 +24,19 @@ type Server struct {
 	route           *httprouter.Router
 	service         *services.Services
 	token           token.TokenMaker
+	s3              storage.ObjectS3
 	taskDistributor any //worker.TaskDistributor
+	publisherPool   msgqueue.PublisherI
 }
 
 type ErrorResponse string
 
 func NewServer(
-	cfg utils.Config, 
-	services *services.Services, 
-	token token.TokenMaker, 
+	cfg utils.Config,
+	services *services.Services,
+	token token.TokenMaker,
+	s3 storage.ObjectS3,
+	pub msgqueue.PublisherI,
 	taskDistributor any,
 ) (*Server, error) {
 
@@ -47,6 +53,8 @@ func NewServer(
 		route:           newHttpRouter, // httprouter.New()
 		token:           token,
 		service:         services,
+		s3:              s3,
+		publisherPool:   pub,
 		taskDistributor: taskDistributor,
 	}
 
@@ -135,7 +143,8 @@ func (s *Server) warehouseRoutes() {
 	s.route.POST("/api/v1/warehouse/inbound/input-item/:transaction_number", s.InputItemWarehouseInbound)
 	s.route.GET("/api/v1/warehouse/inbound/list-items/:transaction_number", s.ListItemsReceived)
 
-	s.route.POST("/api/v1/warehouse/upload/items", nil)
+	s.route.POST("/api/v1/warehouse/upload/items", s.UploadItems)
+	s.route.POST("/api/v1/warehouse/upload/read", s.UploadLogReadDirectly)
 
 }
 

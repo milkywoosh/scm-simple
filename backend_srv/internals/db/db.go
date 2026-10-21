@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -25,11 +26,27 @@ type Conn struct {
 
 func NewConn(ctx context.Context, connString string) (*Conn, error) {
 
-	pgxPoolInit, errPgxPool := pgxpool.New(ctx, connString)
+	cfg, err := pgxpool.ParseConfig(connString)
+	if err != nil {
+		return nil, err
+	}
+
+	// setup config pool db pooldb
+	// test
+	cfg.MaxConns = 10                      // hasil rumus di atas
+	cfg.MinConns = 2                       // koneksi hangat
+	cfg.MaxConnLifetime = 30 * time.Minute // recycle koneksi
+	cfg.MaxConnIdleTime = 5 * time.Minute
+	cfg.HealthCheckPeriod = 1 * time.Minute
+	cfg.ConnConfig.ConnectTimeout = 5 * time.Second
+
+	pgxPoolInit, errPgxPool := pgxpool.NewWithConfig(ctx, cfg)
 	if errPgxPool != nil {
 		// log.Fatalf("err pgx pool init: %v", errPgxPool)
 		return nil, errPgxPool
 	}
+
+	// pgxpool.NewWithConfig(ctx, )
 
 	errPing := pgxPoolInit.Ping(ctx)
 	if errPing != nil {

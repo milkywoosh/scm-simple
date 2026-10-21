@@ -2,6 +2,7 @@ package msgqueue
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -14,6 +15,73 @@ type PublisherPool struct {
 	conn     *amqp091.Connection
 	pool     chan *amqp091.Channel // pool of channel berisi struct(*amqp091.Channel)
 	sizePool int
+}
+
+type PublisherI interface {
+	PublishV2(ctx context.Context, exchange, routingKey, jobId, jobType string, payload any) error
+}
+
+func (p *PublisherPool) PublishV2(ctx context.Context, exchange, routingKey, jobId, jobType string, payload any) error {
+
+	ch, err := p.acquire(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		// balikin channel amqp091 ke pool if finnished
+		p.pool <- ch
+	}()
+
+	// convert struct ke JSON(byte)
+	rawByte, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	// put into envelope
+	valBody := NewRawEnvelop(jobId, jobType, rawByte)
+	bodyPayload, err := json.Marshal(valBody)
+	if err != nil {
+		return err
+	}
+
+	msgPub := amqp091.Publishing{
+		MessageId:   jobId,
+		Type:        jobType,
+		UserId:      "lukerbtmq",
+		Timestamp:   time.Now(),
+		ContentType: "application/json", //depends Body, konvensi, kalo payload bentuk JSON => application/json
+		Body:        bodyPayload,
+	}
+
+	deferredConfirm, err := ch.PublishWithDeferredConfirmWithContext(ctx, exchange, routingKey, false, false, msgPub)
+	if err != nil {
+		return err
+	}
+
+	if deferredConfirm == nil {
+		return errors.New("channel not in confirm mode")
+	}
+
+	ctxTO, cancelFunc := context.WithTimeout(ctx, 5*time.Second)
+	defer cancelFunc()
+
+	ack, err := deferredConfirm.WaitContext(ctxTO)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return fmt.Errorf("confirm timeout deadline exceeded: %w", err)
+		}
+		return fmt.Errorf("wait confirm: %w", err)
+	}
+
+	if !ack {
+		return ErrBrokerNotConfirm
+	}
+
+	// publish berhasil dan broker sudah ack
+	return nil
+
 }
 
 func (p *PublisherPool) newChannel() (*amqp091.Channel, error) {

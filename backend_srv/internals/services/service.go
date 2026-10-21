@@ -27,7 +27,6 @@ func NewServices(db *db.PgDBInstance) *Services {
 	}
 }
 
-
 func NewAuthentication(dbpgInstance *db.PgDBInstance) *AuthenticationService {
 	return &AuthenticationService{
 		q:   dbpgInstance,

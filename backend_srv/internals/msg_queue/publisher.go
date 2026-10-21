@@ -14,6 +14,10 @@ type PublisherChan struct {
 	ch *amqp091.Channel
 }
 
+
+
+
+
 func NewPubChan(conn *amqp091.Connection) (*PublisherChan, error) {
 	newChan, err := conn.Channel()
 	if err != nil {
