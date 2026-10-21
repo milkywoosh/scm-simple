@@ -6,15 +6,103 @@ import (
 	"log"
 
 	"github.com/rabbitmq/amqp091-go"
-	"scm-simple-luke.com/dir/internals/mail"
-	_ "scm-simple-luke.com/dir/internals/services"
 )
 
 type MessageProcessor interface {
-	ProcessData(string, string) error
+	ProcessData(ctx context.Context, envelopeMsg Envelope) error
+}
+
+type Consumer struct {
+	conn *amqp091.Connection
+}
+
+func NewConsumer(conn *amqp091.Connection) *Consumer {
+	return &Consumer{
+		conn: conn,
+	}
+}
+
+func (c *Consumer) ConsumerTest1(ctx context.Context, exchg, queue string, worker string, event MessageProcessor) error {
+	ch, err := c.conn.Channel()
+	if err != nil {
+		return err
+	}
+	defer ch.Close()
+
+	/* **
+		isi `delivConsumer``
+	MessageId:
+	Type:
+	UserId:
+	Timestamp:
+	ContentType:
+	Body:
+
+	*/
+
+	delivConsumer, err := ch.ConsumeWithContext(
+		ctx,
+		queue,
+		worker, // worker as consumer, yang akan menerima dari QUEUE, misal [order-worker-1, order-worker-2, order-worker-3]
+		false,  // autoAck=true, after consume dianggap delivered aja pkoknya. Bisa ilang klo server crash
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Printf("err chConsumer: %v", err)
+		return err
+	}
+
+	// rmmber disini blocking, ketika receiving message dari QUEUE
+	for msg := range delivConsumer {
+
+		// msg.MessageId = jobId
+		// msg.Exchange
+		// msg.Priority
+
+		var envelopeMsg Envelope
+
+		err := json.Unmarshal(msg.Body, &envelopeMsg)
+		if err != nil {
+			log.Printf("err chConsumer: %v", err)
+			// Nack pesan ini, jangan requeue kalau errornya pasti gagal lagi (bad payload, dll)
+			if nackErr := msg.Nack(false, false); nackErr != nil {
+				log.Printf("failed to nack message: %v", nackErr)
+			}
+			continue // lanjut ke pesan berikutnya, JANGAN return
+		}
+		log.Printf("received envelopeMsg: %s", envelopeMsg)
+
+		err = event.ProcessData(ctx, envelopeMsg)
+		// if ada error then Nack
+		if err != nil {
+			log.Printf("failed to process message: %v | body: %s", err, string(msg.Body))
+
+			// Nack pesan ini, jangan requeue kalau errornya pasti gagal lagi (bad payload, dll)
+			if nackErr := msg.Nack(false, false); nackErr != nil {
+				log.Printf("failed to nack message: %v", nackErr)
+			}
+			continue // lanjut ke pesan berikutnya, JANGAN return
+		}
+
+		// if ada NO ERR then Ack
+		if ackErr := msg.Ack(false); ackErr != nil {
+			log.Printf("failed to ack message: %v", ackErr)
+			continue
+		}
+
+		log.Printf("msg processed and acked successfully")
+	}
+
+	return nil
+
 }
 
 // jgn return error check via log aja dulu
+/*
+
 func ConsumerOrder(ctx context.Context, conn *amqp091.Connection, exchg, queue string, worker string, event MessageProcessor) error {
 
 	ch, err := conn.Channel()
@@ -38,9 +126,10 @@ func ConsumerOrder(ctx context.Context, conn *amqp091.Connection, exchg, queue s
 		return err
 	}
 
+	// rmmber disini blocking, ketika receiving message dari QUEUE
 	for msg := range delivConsumer {
 
-		// msg.MessageId
+		// msg.MessageId = jobId
 		// msg.Exchange
 		// msg.Priority
 
@@ -132,71 +221,4 @@ func ConsumerEmailNotif(ctx context.Context, conn *amqp091.Connection, exchg, qu
 	return nil
 }
 
-func ConsumerProductCSV(ctx context.Context, conn *amqp091.Connection, exchg, queue string, worker string, event any) error {
-
-	ch, err := conn.Channel()
-	if err != nil {
-		return err
-	}
-
-	defer ch.Close()
-
-	// test
-
-	/*
-	// "csv.exchange", "direct", "csv.product", "csv.count"
-	deliv, err := ch.ConsumeWithContext(
-		ctx,
-		queue,
-		worker, // worker as consumer, yang akan menerima dari QUEUE, misal [order-worker-1, order-worker-2, order-worker-3]
-		false,  // autoAck=true, after consume dianggap delivered aja pkoknya. Bisa ilang klo server crash
-		false,
-		false,
-		false,
-		nil,
-	)
-
-	if err != nil {
-		log.Printf("err chConsumer: %v", err)
-		return err
-	}
-
-	// get
-
-	// test
-
-	for msg := range deliv {
-
-		// var payload service.PayloadProduct
-		var payload service.PayloadProduct
-
-		if err := json.Unmarshal(msg.Body, &payload); err != nil {
-			log.Printf("failed to unmarshal email payload: %v", err)
-			msg.Nack(false, false) // reject, no requeue if payload rusak
-			continue
-		}
-
-		log.Println("berhasil kirim payload test Product CSV", payload.Bucket)
-		log.Println("berhasil kirim payload test Product CSV", payload.FileName)
-		log.Println("berhasil kirim payload test Product CSV", payload.S3Path)
-		// create function update
-
-		err := event.GroupingItemByProductCode(payload.Bucket, payload.Key, payload.FileName)
-		if err != nil {
-			msg.Nack(false, false)
-			continue
-		}
-
-		// acknowledge terakhir ketika semua proses selesai no error
-		ackErr := msg.Ack(false)
-		if ackErr != nil {
-			log.Printf("failed to ack message: %v", ackErr)
-			continue
-		}
-
-	}
-
-	*/
-
-	return nil
-}
+*/
